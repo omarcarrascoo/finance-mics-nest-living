@@ -1,0 +1,156 @@
+{
+  "info": {
+    "name": "Finance API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Get all payments",
+          "request": { "method": "GET", "url": "{{baseUrl}}/payments" }
+        },
+        {
+          "name": "Create payment",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"resident\": \"<residentId>\",\n  \"category\": \"<categoryId>\",\n  \"amount\": 100,\n  \"method\": \"TRANSFER\"\n}"
+            },
+            "url": "{{baseUrl}}/payments"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        { "name": "Get all categories", "request": { "method": "GET", "url": "{{baseUrl}}/categories" } },
+        {
+          "name": "Create category",
+          "request": {
+            "method": "POST",
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": {"mode":"raw","raw":"{\n  \"name\": \"Maintenance\",\n  \"type\": \"maintenance\"\n}"},
+            "url": "{{baseUrl}}/categories"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Residents",
+      "item": [
+        { "name": "Get all residents", "request": { "method": "GET", "url": "{{baseUrl}}/residents" } },
+        {
+          "name": "Create resident",
+          "request": {
+            "method": "POST",
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": {"mode":"raw","raw":"{\n  \"name\": \"John Doe\",\n  \"unitNumber\": \"A1\",\n  \"email\": \"john@example.com\"\n}"},
+            "url": "{{baseUrl}}/residents"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Budgets",
+      "item": [
+        { "name": "Get all budgets", "request": { "method": "GET", "url": "{{baseUrl}}/budgets" } },
+        {
+          "name": "Create budget",
+          "request": {
+            "method": "POST",
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": {"mode":"raw","raw":"{\n  \"year\": 2025\n}"},
+            "url": "{{baseUrl}}/budgets"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Provider expenses",
+      "item": [
+        { "name": "Get all provider expenses", "request": { "method": "GET", "url": "{{baseUrl}}/provider-expenses" } },
+        {
+          "name": "Create provider expense",
+          "request": {
+            "method": "POST",
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": {"mode":"raw","raw":"{\n  \"providerName\": \"CleanCo\",\n  \"serviceCategory\": \"<categoryId>\",\n  \"totalAmount\": 300\n}"},
+            "url": "{{baseUrl}}/provider-expenses"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Delinquencies",
+      "item": [
+        { "name": "Get all delinquencies", "request": { "method": "GET", "url": "{{baseUrl}}/delinquencies" } },
+        {
+          "name": "Create delinquency",
+          "request": {
+            "method": "POST",
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": {"mode":"raw","raw":"{\n  \"description\": \"Late fee\",\n  \"amount\": 50\n}"},
+            "url": "{{baseUrl}}/delinquencies"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Extraordinary expenses",
+      "item": [
+        { "name": "Get all extraordinary expenses", "request": { "method": "GET", "url": "{{baseUrl}}/extraordinary-expenses" } },
+        {
+          "name": "Create extraordinary expense",
+          "request": {
+            "method": "POST",
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": {"mode":"raw","raw":"{\n  \"concept\": \"Roof repair\",\n  \"amount\": 2000,\n  \"approvedBy\": \"Board\"\n}"},
+            "url": "{{baseUrl}}/extraordinary-expenses"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reserve fund transactions",
+      "item": [
+        { "name": "Get all reserve fund transactions", "request": { "method": "GET", "url": "{{baseUrl}}/reserve-fund-transactions" } },
+        {
+          "name": "Create reserve fund transaction",
+          "request": {
+            "method": "POST",
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": {"mode":"raw","raw":"{\n  \"amount\": 500,\n  \"type\": \"INCOME\",\n  \"notes\": \"Initial fund\"\n}"},
+            "url": "{{baseUrl}}/reserve-fund-transactions"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bank transactions",
+      "item": [
+        { "name": "Get all bank transactions", "request": { "method": "GET", "url": "{{baseUrl}}/bank-transactions" } },
+        {
+          "name": "Create bank transaction",
+          "request": {
+            "method": "POST",
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": {"mode":"raw","raw":"{\n  \"bankDate\": \"2025-01-01\",\n  \"bankAmount\": 500,\n  \"matched\": false\n}"},
+            "url": "{{baseUrl}}/bank-transactions"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        { "name": "Monthly balance", "request": { "method": "GET", "url": "{{baseUrl}}/reports/monthly-balance?month=1&year=2025" } },
+        { "name": "Income vs expense", "request": { "method": "GET", "url": "{{baseUrl}}/reports/income-expense?start=2025-01-01&end=2025-02-01" } }
+      ]
+    }
+  ]
+}
