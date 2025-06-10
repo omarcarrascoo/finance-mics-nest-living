@@ -1,25 +1,32 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { Resident } from './entities/resident.entity';
 
 @Injectable()
 export class ResidentsService {
+  constructor(
+    @InjectRepository(Resident)
+    private readonly residentsRepo: Repository<Resident>,
+  ) {}
+
   create(resident: Resident) {
-    return `This action adds a new resident`;
+    return this.residentsRepo.save(resident);
   }
 
   findAll() {
-    return `This action returns all residents`;
+    return this.residentsRepo.find({ relations: ['payments'] });
   }
 
   findOne(id: string) {
-    return `This action returns a #${id} resident`;
+    return this.residentsRepo.findOne({ where: { id }, relations: ['payments'] });
   }
 
-  update(id: string, resident: Resident) {
-    return `This action updates a #${id} resident`;
+  update(id: string, resident: Partial<Resident>) {
+    return this.residentsRepo.update(id, resident);
   }
 
   remove(id: string) {
-    return `This action removes a #${id} resident`;
+    return this.residentsRepo.delete(id);
   }
 }

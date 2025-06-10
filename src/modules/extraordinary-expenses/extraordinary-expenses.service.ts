@@ -1,25 +1,32 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { ExtraordinaryExpense } from './entities/extraordinary-expense.entity';
 
 @Injectable()
 export class ExtraordinaryExpensesService {
+  constructor(
+    @InjectRepository(ExtraordinaryExpense)
+    private readonly extraRepo: Repository<ExtraordinaryExpense>,
+  ) {}
+
   create(expense: ExtraordinaryExpense) {
-    return `This action adds a new extraordinary expense`;
+    return this.extraRepo.save(expense);
   }
 
   findAll() {
-    return `This action returns all extraordinary expenses`;
+    return this.extraRepo.find();
   }
 
   findOne(id: string) {
-    return `This action returns a #${id} extraordinary expense`;
+    return this.extraRepo.findOne({ where: { id } });
   }
 
-  update(id: string, expense: ExtraordinaryExpense) {
-    return `This action updates a #${id} extraordinary expense`;
+  update(id: string, expense: Partial<ExtraordinaryExpense>) {
+    return this.extraRepo.update(id, expense);
   }
 
   remove(id: string) {
-    return `This action removes a #${id} extraordinary expense`;
+    return this.extraRepo.delete(id);
   }
 }

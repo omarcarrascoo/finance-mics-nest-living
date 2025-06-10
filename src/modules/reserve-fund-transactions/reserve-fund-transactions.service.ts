@@ -1,25 +1,32 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { ReserveFundTransaction } from './entities/reserve-fund-transaction.entity';
 
 @Injectable()
 export class ReserveFundTransactionsService {
+  constructor(
+    @InjectRepository(ReserveFundTransaction)
+    private readonly reserveRepo: Repository<ReserveFundTransaction>,
+  ) {}
+
   create(tx: ReserveFundTransaction) {
-    return `This action adds a new reserve fund transaction`;
+    return this.reserveRepo.save(tx);
   }
 
   findAll() {
-    return `This action returns all reserve fund transactions`;
+    return this.reserveRepo.find();
   }
 
   findOne(id: string) {
-    return `This action returns a #${id} reserve fund transaction`;
+    return this.reserveRepo.findOne({ where: { id } });
   }
 
-  update(id: string, tx: ReserveFundTransaction) {
-    return `This action updates a #${id} reserve fund transaction`;
+  update(id: string, tx: Partial<ReserveFundTransaction>) {
+    return this.reserveRepo.update(id, tx);
   }
 
   remove(id: string) {
-    return `This action removes a #${id} reserve fund transaction`;
+    return this.reserveRepo.delete(id);
   }
 }

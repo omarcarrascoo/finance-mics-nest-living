@@ -1,25 +1,32 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { BankTransaction } from './entities/bank-transaction.entity';
 
 @Injectable()
 export class BankReconciliationService {
+  constructor(
+    @InjectRepository(BankTransaction)
+    private readonly bankRepo: Repository<BankTransaction>,
+  ) {}
+
   create(tx: BankTransaction) {
-    return `This action adds a new bank transaction`;
+    return this.bankRepo.save(tx);
   }
 
   findAll() {
-    return `This action returns all bank transactions`;
+    return this.bankRepo.find();
   }
 
   findOne(id: string) {
-    return `This action returns a #${id} bank transaction`;
+    return this.bankRepo.findOne({ where: { id } });
   }
 
-  update(id: string, tx: BankTransaction) {
-    return `This action updates a #${id} bank transaction`;
+  update(id: string, tx: Partial<BankTransaction>) {
+    return this.bankRepo.update(id, tx);
   }
 
   remove(id: string) {
-    return `This action removes a #${id} bank transaction`;
+    return this.bankRepo.delete(id);
   }
 }

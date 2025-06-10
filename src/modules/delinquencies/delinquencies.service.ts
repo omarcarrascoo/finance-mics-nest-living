@@ -1,25 +1,32 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { Delinquency } from './entities/delinquency.entity';
 
 @Injectable()
 export class DelinquenciesService {
+  constructor(
+    @InjectRepository(Delinquency)
+    private readonly delinquencyRepo: Repository<Delinquency>,
+  ) {}
+
   create(delinquency: Delinquency) {
-    return `This action adds a new delinquency`;
+    return this.delinquencyRepo.save(delinquency);
   }
 
   findAll() {
-    return `This action returns all delinquencies`;
+    return this.delinquencyRepo.find();
   }
 
   findOne(id: string) {
-    return `This action returns a #${id} delinquency`;
+    return this.delinquencyRepo.findOne({ where: { id } });
   }
 
-  update(id: string, delinquency: Delinquency) {
-    return `This action updates a #${id} delinquency`;
+  update(id: string, delinquency: Partial<Delinquency>) {
+    return this.delinquencyRepo.update(id, delinquency);
   }
 
   remove(id: string) {
-    return `This action removes a #${id} delinquency`;
+    return this.delinquencyRepo.delete(id);
   }
 }

@@ -1,32 +1,57 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { ReportsService } from './reports.service';
 
 @Controller('reports')
 export class ReportsController {
   constructor(private readonly reportsService: ReportsService) {}
 
-  @Post()
-  create(@Body() data: any) {
-    return this.reportsService.create(data);
+  @Get('monthly-balance')
+  monthlyBalance(@Query('month') month: number, @Query('year') year: number) {
+    return this.reportsService.monthlyBalance(Number(month), Number(year));
   }
 
-  @Get()
-  findAll() {
-    return this.reportsService.findAll();
+  @Get('income-expense')
+  incomeExpense(@Query('start') start: string, @Query('end') end: string) {
+    return this.reportsService.incomeExpenseStatement(new Date(start), new Date(end));
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.reportsService.findOne(id);
+  @Get('delinquency')
+  delinquency() {
+    return this.reportsService.delinquencyReport();
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() data: any) {
-    return this.reportsService.update(id, data);
+  @Get('collection')
+  collection(@Query('start') start: string, @Query('end') end: string) {
+    return this.reportsService.collectionDetailReport(new Date(start), new Date(end));
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.reportsService.remove(id);
+  @Get('budget-vs-actual')
+  budgetVsActual(@Query('year') year: number) {
+    return this.reportsService.budgetVsActual(Number(year));
+  }
+
+  @Get('annual-summary')
+  annualSummary(@Query('year') year: number) {
+    return this.reportsService.annualSummary(Number(year));
+  }
+
+  @Get('bank-reconciliation')
+  bankReconciliation() {
+    return this.reportsService.bankReconciliation();
+  }
+
+  @Get('reserve-fund')
+  reserveFund() {
+    return this.reportsService.reserveFundReport();
+  }
+
+  @Get('provider-expenses')
+  providerExpenses(@Query('start') start: string, @Query('end') end: string) {
+    return this.reportsService.providerExpensesReport(new Date(start), new Date(end));
+  }
+
+  @Get('extra-expenses')
+  extraExpenses(@Query('start') start: string, @Query('end') end: string) {
+    return this.reportsService.extraordinaryExpensesReport(new Date(start), new Date(end));
   }
 }
