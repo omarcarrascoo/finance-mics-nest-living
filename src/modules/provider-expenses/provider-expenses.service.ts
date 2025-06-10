@@ -19,7 +19,10 @@ export class ProviderExpensesService {
   }
 
   findOne(id: string) {
-    return this.expensesRepo.findOne({ where: { id }, relations: ['serviceCategory'] });
+    return this.expensesRepo.findOne({
+      where: { id },
+      relations: ['serviceCategory'],
+    });
   }
 
   update(id: string, expense: Partial<ProviderExpense>) {

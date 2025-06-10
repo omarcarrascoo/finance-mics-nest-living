@@ -1,10 +1,20 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { ProviderExpensesService } from './provider-expenses.service';
 import { ProviderExpense } from './entities/provider-expense.entity';
 
 @Controller('provider-expenses')
 export class ProviderExpensesController {
-  constructor(private readonly providerExpensesService: ProviderExpensesService) {}
+  constructor(
+    private readonly providerExpensesService: ProviderExpensesService,
+  ) {}
 
   @Post()
   create(@Body() expense: ProviderExpense) {

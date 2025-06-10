@@ -19,7 +19,10 @@ export class PaymentsService {
   }
 
   findOne(id: string) {
-    return this.paymentsRepo.findOne({ where: { id }, relations: ['resident', 'category'] });
+    return this.paymentsRepo.findOne({
+      where: { id },
+      relations: ['resident', 'category'],
+    });
   }
 
   update(id: string, payment: Partial<Payment>) {

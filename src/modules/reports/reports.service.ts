@@ -38,13 +38,13 @@ export class ReportsService {
     const start = new Date(year, month - 1, 1);
     const end = new Date(year, month, 0, 23, 59, 59);
     const incomes = await this.paymentRepo.sum('amount', {
-      where: { paymentDate: Between(start, end) },
+      paymentDate: Between(start, end),
     });
     const provider = await this.providerRepo.sum('totalAmount', {
-      where: { expenseDate: Between(start, end) },
+      expenseDate: Between(start, end),
     });
     const extras = await this.extraRepo.sum('amount', {
-      where: { date: Between(start, end) },
+      date: Between(start, end),
     });
     const expenses = (provider ?? 0) + (extras ?? 0);
     return {
@@ -63,8 +63,14 @@ export class ReportsService {
       where: { expenseDate: Between(start, end) },
       relations: ['serviceCategory'],
     });
-    const extras = await this.extraRepo.find({ where: { date: Between(start, end) } });
-    return { payments, providerExpenses: provider, extraordinaryExpenses: extras };
+    const extras = await this.extraRepo.find({
+      where: { date: Between(start, end) },
+    });
+    return {
+      payments,
+      providerExpenses: provider,
+      extraordinaryExpenses: extras,
+    };
   }
 
   async delinquencyReport() {
@@ -79,13 +85,18 @@ export class ReportsService {
   }
 
   async budgetVsActual(year: number) {
-    const budget = await this.budgetRepo.findOne({ where: { year }, relations: ['items'] });
+    const budget = await this.budgetRepo.findOne({
+      where: { year },
+      relations: ['items'],
+    });
     if (!budget) return null;
     return budget.items.map((i) => ({
       category: i.category?.name,
       planned: i.plannedAmount,
       actual: i.actualAmount,
-      variance: i.plannedAmount ? ((i.actualAmount - i.plannedAmount) / i.plannedAmount) * 100 : 0,
+      variance: i.plannedAmount
+        ? ((i.actualAmount - i.plannedAmount) / i.plannedAmount) * 100
+        : 0,
     }));
   }
 
@@ -93,12 +104,14 @@ export class ReportsService {
     const start = new Date(year, 0, 1);
     const end = new Date(year, 11, 31, 23, 59, 59);
     const incomes = await this.paymentRepo.sum('amount', {
-      where: { paymentDate: Between(start, end) },
+      paymentDate: Between(start, end),
     });
     const provider = await this.providerRepo.sum('totalAmount', {
-      where: { expenseDate: Between(start, end) },
+      expenseDate: Between(start, end),
     });
-    const extras = await this.extraRepo.sum('amount', { where: { date: Between(start, end) } });
+    const extras = await this.extraRepo.sum('amount', {
+      date: Between(start, end),
+    });
     return {
       incomes: incomes ?? 0,
       expenses: (provider ?? 0) + (extras ?? 0),
@@ -114,7 +127,9 @@ export class ReportsService {
   }
 
   async providerExpensesReport(start: Date, end: Date) {
-    return this.providerRepo.find({ where: { expenseDate: Between(start, end) } });
+    return this.providerRepo.find({
+      where: { expenseDate: Between(start, end) },
+    });
   }
 
   async extraordinaryExpensesReport(start: Date, end: Date) {

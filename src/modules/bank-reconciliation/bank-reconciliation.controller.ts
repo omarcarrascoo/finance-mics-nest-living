@@ -1,10 +1,20 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { BankReconciliationService } from './bank-reconciliation.service';
 import { BankTransaction } from './entities/bank-transaction.entity';
 
 @Controller('bank-transactions')
 export class BankReconciliationController {
-  constructor(private readonly bankReconciliationService: BankReconciliationService) {}
+  constructor(
+    private readonly bankReconciliationService: BankReconciliationService,
+  ) {}
 
   @Post()
   create(@Body() tx: BankTransaction) {

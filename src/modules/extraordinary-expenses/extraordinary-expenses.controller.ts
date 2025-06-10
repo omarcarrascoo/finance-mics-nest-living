@@ -1,10 +1,20 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { ExtraordinaryExpensesService } from './extraordinary-expenses.service';
 import { ExtraordinaryExpense } from './entities/extraordinary-expense.entity';
 
 @Controller('extraordinary-expenses')
 export class ExtraordinaryExpensesController {
-  constructor(private readonly extraordinaryExpensesService: ExtraordinaryExpensesService) {}
+  constructor(
+    private readonly extraordinaryExpensesService: ExtraordinaryExpensesService,
+  ) {}
 
   @Post()
   create(@Body() expense: ExtraordinaryExpense) {

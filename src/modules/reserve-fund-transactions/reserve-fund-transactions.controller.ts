@@ -1,10 +1,20 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { ReserveFundTransactionsService } from './reserve-fund-transactions.service';
 import { ReserveFundTransaction } from './entities/reserve-fund-transaction.entity';
 
 @Controller('reserve-fund-transactions')
 export class ReserveFundTransactionsController {
-  constructor(private readonly reserveFundTransactionsService: ReserveFundTransactionsService) {}
+  constructor(
+    private readonly reserveFundTransactionsService: ReserveFundTransactionsService,
+  ) {}
 
   @Post()
   create(@Body() tx: ReserveFundTransaction) {

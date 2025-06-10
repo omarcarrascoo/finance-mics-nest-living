@@ -12,7 +12,10 @@ export class ReportsController {
 
   @Get('income-expense')
   incomeExpense(@Query('start') start: string, @Query('end') end: string) {
-    return this.reportsService.incomeExpenseStatement(new Date(start), new Date(end));
+    return this.reportsService.incomeExpenseStatement(
+      new Date(start),
+      new Date(end),
+    );
   }
 
   @Get('delinquency')
@@ -22,7 +25,10 @@ export class ReportsController {
 
   @Get('collection')
   collection(@Query('start') start: string, @Query('end') end: string) {
-    return this.reportsService.collectionDetailReport(new Date(start), new Date(end));
+    return this.reportsService.collectionDetailReport(
+      new Date(start),
+      new Date(end),
+    );
   }
 
   @Get('budget-vs-actual')
@@ -47,11 +53,17 @@ export class ReportsController {
 
   @Get('provider-expenses')
   providerExpenses(@Query('start') start: string, @Query('end') end: string) {
-    return this.reportsService.providerExpensesReport(new Date(start), new Date(end));
+    return this.reportsService.providerExpensesReport(
+      new Date(start),
+      new Date(end),
+    );
   }
 
   @Get('extra-expenses')
   extraExpenses(@Query('start') start: string, @Query('end') end: string) {
-    return this.reportsService.extraordinaryExpensesReport(new Date(start), new Date(end));
+    return this.reportsService.extraordinaryExpensesReport(
+      new Date(start),
+      new Date(end),
+    );
   }
 }
