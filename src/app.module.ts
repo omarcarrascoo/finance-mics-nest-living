@@ -12,6 +12,7 @@ import { ExtraordinaryExpensesModule } from './modules/extraordinary-expenses/ex
 import { ReserveFundTransactionsModule } from './modules/reserve-fund-transactions/reserve-fund-transactions.module';
 import { BankReconciliationModule } from './modules/bank-reconciliation/bank-reconciliation.module';
 import { ReportsModule } from './modules/reports/reports.module';
+import { MaintenanceModule } from './modules/maintenance/maintenance.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { ReportsModule } from './modules/reports/reports.module';
     ReserveFundTransactionsModule,
     BankReconciliationModule,
     ReportsModule,
+    MaintenanceModule,
   ],
   controllers: [AppController],
   providers: [AppService],

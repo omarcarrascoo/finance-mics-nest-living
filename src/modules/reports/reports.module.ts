@@ -11,6 +11,7 @@ import { Budget } from '../budgets/entities/budget.entity';
 import { BudgetItem } from '../budgets/entities/budget-item.entity';
 import { Delinquency } from '../delinquencies/entities/delinquency.entity';
 import { Resident } from '../residents/entities/resident.entity';
+import { Maintenance } from '../maintenance/entities/maintenance.entity';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { Resident } from '../residents/entities/resident.entity';
       BudgetItem,
       Delinquency,
       Resident,
+      Maintenance,
     ]),
   ],
   controllers: [ReportsController],
