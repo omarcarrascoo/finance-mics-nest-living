@@ -29,7 +29,7 @@ export class Payment {
   @Column('decimal', { precision: 12, scale: 2 })
   amount: number;
 
-  @Column({ type: 'simple-enum', enum: PaymentMethod })
+  @Column({ type: 'simple-enum' })
   method: PaymentMethod;
 
   @CreateDateColumn()
