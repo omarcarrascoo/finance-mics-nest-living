@@ -57,6 +57,19 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
+## Seed database
+
+Populate the local SQLite database with sample data using:
+
+```bash
+$ npm run seed
+```
+
+## API usage with Postman
+
+Import the `docs/finance-api.postman_collection.json` file into Postman to try all available endpoints.
+
+
 ## Deployment
 
 When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.

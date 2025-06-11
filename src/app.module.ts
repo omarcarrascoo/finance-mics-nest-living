@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PaymentsModule } from './modules/payments/payments.module';
@@ -14,6 +15,12 @@ import { ReportsModule } from './modules/reports/reports.module';
 
 @Module({
   imports: [
+    TypeOrmModule.forRoot({
+      type: 'sqlite',
+      database: 'database.sqlite',
+      entities: [__dirname + '/modules/**/*.entity{.ts,.js}'],
+      synchronize: true,
+    }),
     PaymentsModule,
     DelinquenciesModule,
     CategoriesModule,

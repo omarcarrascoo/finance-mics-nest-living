@@ -15,6 +15,6 @@ export class Category {
   @Column()
   name: string;
 
-  @Column({ type: 'enum', enum: CategoryType })
+  @Column({ type: 'simple-enum', enum: CategoryType })
   type: CategoryType;
 }
