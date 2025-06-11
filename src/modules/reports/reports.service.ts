@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, Repository } from 'typeorm';
+import { Between, Repository, LessThan } from 'typeorm';
 import { Payment } from '../payments/entities/payment.entity';
 import { ProviderExpense } from '../provider-expenses/entities/provider-expense.entity';
 import { ExtraordinaryExpense } from '../extraordinary-expenses/entities/extraordinary-expense.entity';
@@ -10,6 +10,7 @@ import { Budget } from '../budgets/entities/budget.entity';
 import { BudgetItem } from '../budgets/entities/budget-item.entity';
 import { Delinquency } from '../delinquencies/entities/delinquency.entity';
 import { Resident } from '../residents/entities/resident.entity';
+import { Maintenance } from '../maintenance/entities/maintenance.entity';
 
 @Injectable()
 export class ReportsService {
@@ -32,6 +33,8 @@ export class ReportsService {
     private readonly delinquencyRepo: Repository<Delinquency>,
     @InjectRepository(Resident)
     private readonly residentRepo: Repository<Resident>,
+    @InjectRepository(Maintenance)
+    private readonly maintenanceRepo: Repository<Maintenance>,
   ) {}
 
   async monthlyBalance(month: number, year: number) {
@@ -74,7 +77,12 @@ export class ReportsService {
   }
 
   async delinquencyReport() {
-    return this.delinquencyRepo.find();
+    const fines = await this.delinquencyRepo.find({ relations: ['resident'] });
+    const maintenance = await this.maintenanceRepo.find({
+      where: { paid: false, dueDate: LessThan(new Date()) },
+      relations: ['resident'],
+    });
+    return { fines, maintenance };
   }
 
   async collectionDetailReport(start: Date, end: Date) {

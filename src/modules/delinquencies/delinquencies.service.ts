@@ -15,11 +15,11 @@ export class DelinquenciesService {
   }
 
   findAll() {
-    return this.delinquencyRepo.find();
+    return this.delinquencyRepo.find({ relations: ['resident'] });
   }
 
   findOne(id: string) {
-    return this.delinquencyRepo.findOne({ where: { id } });
+    return this.delinquencyRepo.findOne({ where: { id }, relations: ['resident'] });
   }
 
   update(id: string, delinquency: Partial<Delinquency>) {

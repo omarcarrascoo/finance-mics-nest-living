@@ -16,6 +16,7 @@ import { Budget } from '../src/modules/budgets/entities/budget.entity';
 import { BudgetItem } from '../src/modules/budgets/entities/budget-item.entity';
 import { ProviderExpense } from '../src/modules/provider-expenses/entities/provider-expense.entity';
 import { Delinquency } from '../src/modules/delinquencies/entities/delinquency.entity';
+import { Maintenance } from '../src/modules/maintenance/entities/maintenance.entity';
 import { ExtraordinaryExpense } from '../src/modules/extraordinary-expenses/entities/extraordinary-expense.entity';
 import { ReserveFundTransaction } from '../src/modules/reserve-fund-transactions/entities/reserve-fund-transaction.entity';
 import { BankTransaction } from '../src/modules/bank-reconciliation/entities/bank-transaction.entity';
@@ -40,6 +41,7 @@ async function seed(): Promise<SeedResult> {
   const budgetItemRepo = dataSource.getRepository(BudgetItem);
   const providerExpenseRepo = dataSource.getRepository(ProviderExpense);
   const delinquencyRepo = dataSource.getRepository(Delinquency);
+  const maintenanceRepo = dataSource.getRepository(Maintenance);
   const extraordinaryExpenseRepo =
     dataSource.getRepository(ExtraordinaryExpense);
   const reserveFundRepo = dataSource.getRepository(ReserveFundTransaction);
@@ -70,6 +72,26 @@ async function seed(): Promise<SeedResult> {
     );
   }
   await residentRepo.save(residents);
+
+  // --- Maintenance ---
+  const maintenances: Maintenance[] = [];
+  residents.forEach((resident) => {
+    maintenances.push(
+      maintenanceRepo.create({
+        resident,
+        amount: 100,
+        dueDate: faker.date.recent({ days: 20 }),
+        paid: faker.datatype.boolean(),
+      }),
+      maintenanceRepo.create({
+        resident,
+        amount: 100,
+        dueDate: faker.date.soon({ days: 10 }),
+        paid: false,
+      }),
+    );
+  });
+  await maintenanceRepo.save(maintenances);
 
   // --- Payments ---
   const payments: Payment[] = [];
@@ -139,11 +161,20 @@ async function seed(): Promise<SeedResult> {
 
   // --- Delinquencies ---
   const delinquencies: Delinquency[] = [];
-  for (let i = 0; i < 10; i++) {
-    const description = faker.lorem.words(3);
-    const amount = faker.number.float({ min: 20, max: 200, fractionDigits: 2 });
-    delinquencies.push(delinquencyRepo.create({ description, amount }));
-  }
+  residents.forEach((resident) => {
+    const count = faker.number.int({ min: 0, max: 2 });
+    for (let i = 0; i < count; i++) {
+      const description = faker.lorem.words(3);
+      const amount = faker.number.float({
+        min: 20,
+        max: 200,
+        fractionDigits: 2,
+      });
+      delinquencies.push(
+        delinquencyRepo.create({ resident, description, amount }),
+      );
+    }
+  });
   await delinquencyRepo.save(delinquencies);
 
   // --- Extraordinary Expenses ---
