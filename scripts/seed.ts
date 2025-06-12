@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
@@ -235,7 +236,8 @@ async function seed(): Promise<SeedResult> {
         max: 1000,
         fractionDigits: 2,
       });
-      const notes = i === 0 && month === 0 ? 'Initial fund' : faker.lorem.sentence();
+      const notes =
+        i === 0 && month === 0 ? 'Initial fund' : faker.lorem.sentence();
       reserveTxs.push(
         reserveFundRepo.create({
           type,
