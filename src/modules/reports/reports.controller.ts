@@ -10,6 +10,17 @@ export class ReportsController {
     return this.reportsService.monthlyBalance(Number(month), Number(year));
   }
 
+  @Get('monthly-balance-range')
+  monthlyBalanceRange(
+    @Query('start') start: string,
+    @Query('end') end: string,
+  ) {
+    return this.reportsService.monthlyBalanceRange(
+      new Date(start),
+      new Date(end),
+    );
+  }
+
   @Get('income-expense')
   incomeExpense(@Query('start') start: string, @Query('end') end: string) {
     return this.reportsService.incomeExpenseStatement(
