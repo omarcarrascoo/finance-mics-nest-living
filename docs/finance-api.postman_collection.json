@@ -149,6 +149,7 @@
       "name": "Reports",
       "item": [
         { "name": "Monthly balance", "request": { "method": "GET", "url": "{{baseUrl}}/reports/monthly-balance?month=1&year=2025" } },
+        { "name": "Monthly balance range", "request": { "method": "GET", "url": "{{baseUrl}}/reports/monthly-balance-range?start=2025-01-01&end=2025-06-30" } },
         { "name": "Income vs expense", "request": { "method": "GET", "url": "{{baseUrl}}/reports/income-expense?start=2025-01-01&end=2025-02-01" } }
       ]
     }

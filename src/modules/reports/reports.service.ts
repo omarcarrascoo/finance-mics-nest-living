@@ -57,6 +57,29 @@ export class ReportsService {
     };
   }
 
+  async monthlyBalanceRange(start: Date, end: Date) {
+    const results = [] as {
+      year: number;
+      month: number;
+      incomes: number;
+      expenses: number;
+      balance: number;
+    }[];
+
+    let current = new Date(start.getFullYear(), start.getMonth(), 1);
+    const last = new Date(end.getFullYear(), end.getMonth(), 1);
+
+    while (current <= last) {
+      const year = current.getFullYear();
+      const month = current.getMonth() + 1;
+      const data = await this.monthlyBalance(month, year);
+      results.push({ year, month, ...data });
+      current.setMonth(current.getMonth() + 1);
+    }
+
+    return results;
+  }
+
   async incomeExpenseStatement(start: Date, end: Date) {
     const payments = await this.paymentRepo.find({
       where: { paymentDate: Between(start, end) },
