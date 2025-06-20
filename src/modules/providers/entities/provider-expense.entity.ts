@@ -1,22 +1,26 @@
-// src/modules/providers/provider-expense.entity.ts
+// src/modules/providers/entities/provider-expense.entity.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
-  Column,
   ManyToOne,
+  Column,
   CreateDateColumn,
+  JoinColumn,
 } from 'typeorm';
 import { Category } from '../../categories/entities/category.entity';
+import { Provider } from './provider.entity';
 
-@Entity()
+@Entity('provider_expenses')
 export class ProviderExpense {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
-  providerName: string;
+  @ManyToOne(() => Provider, (p) => p.expenses, { onDelete: 'CASCADE' })
+  @JoinColumn()
+  provider: Provider;
 
-  @ManyToOne(() => Category)
+  @ManyToOne(() => Category, { eager: true })
+  @JoinColumn()
   serviceCategory: Category;
 
   @Column('decimal', { precision: 12, scale: 2 })

@@ -5,7 +5,6 @@ import { AppService } from './app.service';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { DelinquenciesModule } from './modules/delinquencies/delinquencies.module';
 import { CategoriesModule } from './modules/categories/categories.module';
-import { ProviderExpensesModule } from './modules/provider-expenses/provider-expenses.module';
 import { ResidentsModule } from './modules/residents/residents.module';
 import { BudgetsModule } from './modules/budgets/budgets.module';
 import { ExtraordinaryExpensesModule } from './modules/extraordinary-expenses/extraordinary-expenses.module';
@@ -13,6 +12,7 @@ import { ReserveFundTransactionsModule } from './modules/reserve-fund-transactio
 import { BankReconciliationModule } from './modules/bank-reconciliation/bank-reconciliation.module';
 import { ReportsModule } from './modules/reports/reports.module';
 import { MaintenanceModule } from './modules/maintenance/maintenance.module';
+import { ProvidersModule } from './modules/providers/providers.module';
 
 @Module({
   imports: [
@@ -25,7 +25,7 @@ import { MaintenanceModule } from './modules/maintenance/maintenance.module';
     PaymentsModule,
     DelinquenciesModule,
     CategoriesModule,
-    ProviderExpensesModule,
+    ProvidersModule,
     ResidentsModule,
     BudgetsModule,
     ExtraordinaryExpensesModule,

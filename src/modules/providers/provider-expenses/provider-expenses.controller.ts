@@ -8,7 +8,7 @@ import {
   Delete,
 } from '@nestjs/common';
 import { ProviderExpensesService } from './provider-expenses.service';
-import { ProviderExpense } from './entities/provider-expense.entity';
+import { ProviderExpense } from '../entities/provider-expense.entity';
 
 @Controller('provider-expenses')
 export class ProviderExpensesController {

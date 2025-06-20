@@ -15,12 +15,12 @@ import {
 } from '../src/modules/payments/entities/payment.entity';
 import { Budget } from '../src/modules/budgets/entities/budget.entity';
 import { BudgetItem } from '../src/modules/budgets/entities/budget-item.entity';
-import { ProviderExpense } from '../src/modules/provider-expenses/entities/provider-expense.entity';
 import { Delinquency } from '../src/modules/delinquencies/entities/delinquency.entity';
 import { Maintenance } from '../src/modules/maintenance/entities/maintenance.entity';
 import { ExtraordinaryExpense } from '../src/modules/extraordinary-expenses/entities/extraordinary-expense.entity';
 import { ReserveFundTransaction } from '../src/modules/reserve-fund-transactions/entities/reserve-fund-transaction.entity';
 import { BankTransaction } from '../src/modules/bank-reconciliation/entities/bank-transaction.entity';
+import { ProviderExpense } from 'src/modules/providers/entities/provider-expense.entity';
 
 // seed.ts
 const dataSource = new DataSource({
@@ -160,28 +160,28 @@ async function seed(): Promise<SeedResult> {
   }
 
   // --- Provider Expenses ---
-  const providerExpenses: ProviderExpense[] = [];
-  for (let month = 0; month < 12; month++) {
-    const count = faker.number.int({ min: 1, max: 3 });
-    for (let i = 0; i < count; i++) {
-      const providerName = faker.company.name();
-      const serviceCategory = faker.helpers.arrayElement(categories);
-      const totalAmount = faker.number.float({
-        min: 200,
-        max: 2000,
-        fractionDigits: 2,
-      });
-      providerExpenses.push(
-        providerExpenseRepo.create({
-          providerName,
-          serviceCategory,
-          totalAmount,
-          expenseDate: randomDateInMonth(currentYear, month),
-        }),
-      );
-    }
-  }
-  await providerExpenseRepo.save(providerExpenses);
+  // const providerExpenses: ProviderExpense[] = [];
+  // for (let month = 0; month < 12; month++) {
+  //   const count = faker.number.int({ min: 1, max: 3 });
+  //   for (let i = 0; i < count; i++) {
+  //     const providerName = faker.company.name();
+  //     const serviceCategory = faker.helpers.arrayElement(categories);
+  //     const totalAmount = faker.number.float({
+  //       min: 200,
+  //       max: 2000,
+  //       fractionDigits: 2,
+  //     });
+  //     providerExpenses.push(
+  //       providerExpenseRepo.create({
+  //         providerName,
+  //         serviceCategory,
+  //         totalAmount,
+  //         expenseDate: randomDateInMonth(currentYear, month),
+  //       }),
+  //     );
+  //   }
+  // }
+  // await providerExpenseRepo.save(providerExpenses);
 
   // --- Delinquencies ---
   const delinquencies: Delinquency[] = [];

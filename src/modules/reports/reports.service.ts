@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository, LessThan } from 'typeorm';
 import { Payment } from '../payments/entities/payment.entity';
-import { ProviderExpense } from '../provider-expenses/entities/provider-expense.entity';
 import { ExtraordinaryExpense } from '../extraordinary-expenses/entities/extraordinary-expense.entity';
 import { ReserveFundTransaction } from '../reserve-fund-transactions/entities/reserve-fund-transaction.entity';
 import { BankTransaction } from '../bank-reconciliation/entities/bank-transaction.entity';
@@ -11,6 +10,7 @@ import { BudgetItem } from '../budgets/entities/budget-item.entity';
 import { Delinquency } from '../delinquencies/entities/delinquency.entity';
 import { Resident } from '../residents/entities/resident.entity';
 import { Maintenance } from '../maintenance/entities/maintenance.entity';
+import { ProviderExpense } from '../providers/entities/provider-expense.entity';
 
 @Injectable()
 export class ReportsService {
