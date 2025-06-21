@@ -5,6 +5,10 @@
 import { DataSource } from 'typeorm';
 import { faker } from '@faker-js/faker';
 import { Resident } from '../src/modules/residents/entities/resident.entity';
+import { ResidentContact } from '../src/modules/residents/entities/resident-contact.entity';
+import { ResidentLease } from '../src/modules/residents/entities/resident-lease.entity';
+import { ResidentDocument } from '../src/modules/residents/entities/resident-document.entity';
+import { ResidentStatistic } from '../src/modules/residents/entities/resident-statistic.entity';
 import {
   Category,
   CategoryType,
@@ -51,6 +55,10 @@ async function seed(): Promise<SeedResult> {
   await dataSource.initialize();
 
   const residentRepo = dataSource.getRepository(Resident);
+  const residentContactRepo = dataSource.getRepository(ResidentContact);
+  const residentLeaseRepo = dataSource.getRepository(ResidentLease);
+  const residentDocumentRepo = dataSource.getRepository(ResidentDocument);
+  const residentStatisticRepo = dataSource.getRepository(ResidentStatistic);
   const categoryRepo = dataSource.getRepository(Category);
   const paymentRepo = dataSource.getRepository(Payment);
   const budgetRepo = dataSource.getRepository(Budget);
@@ -87,91 +95,80 @@ async function seed(): Promise<SeedResult> {
     const [firstName, lastName] = fullName.split(' ');
     const email = faker.internet.email({ firstName, lastName });
     const phone = faker.phone.number();
-    const moveIn = randomDateInYear(currentYear - 1)
-      .toISOString()
-      .split('T')[0];
+    const moveIn = randomDateInYear(currentYear - 1).toISOString().split('T')[0];
     const maybeMoveOut = faker.datatype.boolean()
-      ? randomDateInYear(currentYear + 1)
-          .toISOString()
-          .split('T')[0]
+      ? randomDateInYear(currentYear + 1).toISOString().split('T')[0]
       : undefined;
-    residents.push(
-      residentRepo.create({
-        fullName,
-        unitNumber: unit,
-        email,
-        phone,
-        moveInDate: moveIn,
-        moveOutDate: maybeMoveOut,
-        status: 'ACTIVE',
-        primaryContact: {
-          type: 'PRIMARY',
-          name: fullName,
-          phone,
-          email,
-        },
-        emergencyContacts: [
-          {
-            type: 'EMERGENCY',
-            name: faker.person.fullName(),
-            relationship: faker.helpers.arrayElement([
-              'Friend',
-              'Parent',
-              'Sibling',
-            ]),
-            phone: faker.phone.number(),
-            email: faker.internet.email(),
-          },
-        ],
-        lease: {
-          startDate: moveIn,
-          endDate: maybeMoveOut,
-          rentAmount: faker.number.int({ min: 800, max: 1500 }),
-          securityDeposit: 1000,
-          leaseDocumentUrl: faker.internet.url(),
-          terms: faker.lorem.sentence(),
-        },
-        documents: [
-          { type: 'LEASE', url: faker.internet.url() },
-          { type: 'ID', url: faker.internet.url() },
-        ],
-        statistics: {
-          totalPayments: faker.number.int({ min: 0, max: 24 }),
-          totalPaid: faker.number.float({
-            min: 0,
-            max: 10000,
-            fractionDigits: 2,
-          }),
-          avgPaymentDelayDays: faker.number.float({
-            min: 0,
-            max: 10,
-            fractionDigits: 2,
-          }),
-          lastPaymentDate: randomDateInYear(currentYear)
-            .toISOString()
-            .split('T')[0],
-          maintenanceRequests: faker.number.int({ min: 0, max: 5 }),
-          delinquenciesCount: faker.number.int({ min: 0, max: 3 }),
-          balanceOwed: faker.number.float({
-            min: 0,
-            max: 5000,
-            fractionDigits: 2,
-          }),
-          delinquencyRate: faker.number.float({
-            min: 0,
-            max: 100,
-            fractionDigits: 2,
-          }),
-        },
-        tags: faker.helpers.arrayElements(['VIP', 'PetFriendly'], {
-          min: 0,
-          max: 2,
-        }),
-        internalNotes: faker.lorem.sentence(),
-      }),
-    );
+
+    const primaryContact = residentContactRepo.create({
+      type: 'PRIMARY',
+      name: fullName,
+      phone,
+      email,
+    });
+    await residentContactRepo.save(primaryContact);
+
+    const lease = residentLeaseRepo.create({
+      startDate: moveIn,
+      endDate: maybeMoveOut,
+      rentAmount: faker.number.int({ min: 800, max: 1500 }),
+      securityDeposit: 1000,
+      leaseDocumentUrl: faker.internet.url(),
+      terms: faker.lorem.sentence(),
+    });
+    await residentLeaseRepo.save(lease);
+
+    const statistics = residentStatisticRepo.create({
+      totalPayments: faker.number.int({ min: 0, max: 24 }),
+      totalPaid: faker.number.float({ min: 0, max: 10000, fractionDigits: 2 }),
+      avgPaymentDelayDays: faker.number.float({ min: 0, max: 10, fractionDigits: 2 }),
+      lastPaymentDate: randomDateInYear(currentYear).toISOString().split('T')[0],
+      maintenanceRequests: faker.number.int({ min: 0, max: 5 }),
+      delinquenciesCount: faker.number.int({ min: 0, max: 3 }),
+      balanceOwed: faker.number.float({ min: 0, max: 5000, fractionDigits: 2 }),
+      delinquencyRate: faker.number.float({ min: 0, max: 100, fractionDigits: 2 }),
+    });
+    await residentStatisticRepo.save(statistics);
+
+    const resident = residentRepo.create({
+      fullName,
+      unitNumber: unit,
+      email,
+      phone,
+      moveInDate: moveIn,
+      moveOutDate: maybeMoveOut,
+      status: 'ACTIVE',
+      primaryContact,
+      lease,
+      statistics,
+      tags: faker.helpers.arrayElements(['VIP', 'PetFriendly'], { min: 0, max: 2 }),
+      internalNotes: faker.lorem.sentence(),
+    });
+    await residentRepo.save(resident);
+
+    primaryContact.resident = resident;
+    await residentContactRepo.save(primaryContact);
+
+    const emergency = residentContactRepo.create({
+      type: 'EMERGENCY',
+      name: faker.person.fullName(),
+      relationship: faker.helpers.arrayElement(['Friend', 'Parent', 'Sibling']),
+      phone: faker.phone.number(),
+      email: faker.internet.email(),
+      resident,
+    });
+    await residentContactRepo.save(emergency);
+
+    const documents = [
+      residentDocumentRepo.create({ type: 'LEASE', url: faker.internet.url(), resident }),
+      residentDocumentRepo.create({ type: 'ID', url: faker.internet.url(), resident }),
+    ];
+    await residentDocumentRepo.save(documents);
+
+    resident.emergencyContacts = [emergency];
+    resident.documents = documents;
+    residents.push(resident);
   }
-  await residentRepo.save(residents);
 
   // --- Maintenance ---
   const maintenances: Maintenance[] = [];
