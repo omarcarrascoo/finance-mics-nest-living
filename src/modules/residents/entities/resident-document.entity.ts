@@ -9,7 +9,7 @@ export class ResidentDocument {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'enum', enum: ['LEASE', 'ID', 'OTHER'] })
+  @Column({ type: 'simple-enum', enum: ['LEASE', 'ID', 'OTHER'] })
   type: ResidentDocType;
 
   @Column()

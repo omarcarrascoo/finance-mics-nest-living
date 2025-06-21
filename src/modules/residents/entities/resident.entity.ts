@@ -51,33 +51,33 @@ export class Resident {
     eager: true,
   })
   @JoinColumn()
-  primaryContact: ResidentContact;
+  primaryContact?: ResidentContact;
 
   @OneToMany(() => ResidentContact, (c) => c.resident, {
     cascade: true,
     eager: true,
   })
-  emergencyContacts: ResidentContact[];
+  emergencyContacts?: ResidentContact[];
 
   @OneToOne(() => ResidentLease, (l) => l.resident, {
     cascade: true,
     eager: true,
   })
   @JoinColumn()
-  lease: ResidentLease;
+  lease?: ResidentLease;
 
   @OneToMany(() => ResidentDocument, (d) => d.resident, {
     cascade: true,
     eager: true,
   })
-  documents: ResidentDocument[];
+  documents?: ResidentDocument[];
 
   @OneToOne(() => ResidentStatistic, (s) => s.resident, {
-    cascade: true,
+    cascade: ['insert', 'update'],
     eager: true,
   })
   @JoinColumn()
-  statistics: ResidentStatistic;
+  statistics?: ResidentStatistic;
 
   // — Relaciones de negocio existentes —
   @OneToMany(() => Payment, (p) => p.resident)

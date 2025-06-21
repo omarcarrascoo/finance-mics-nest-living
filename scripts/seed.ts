@@ -1,7 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { DataSource } from 'typeorm';
 import { faker } from '@faker-js/faker';
 import { Resident } from '../src/modules/residents/entities/resident.entity';
@@ -95,9 +91,13 @@ async function seed(): Promise<SeedResult> {
     const [firstName, lastName] = fullName.split(' ');
     const email = faker.internet.email({ firstName, lastName });
     const phone = faker.phone.number();
-    const moveIn = randomDateInYear(currentYear - 1).toISOString().split('T')[0];
+    const moveIn = randomDateInYear(currentYear - 1)
+      .toISOString()
+      .split('T')[0];
     const maybeMoveOut = faker.datatype.boolean()
-      ? randomDateInYear(currentYear + 1).toISOString().split('T')[0]
+      ? randomDateInYear(currentYear + 1)
+          .toISOString()
+          .split('T')[0]
       : undefined;
 
     const primaryContact = residentContactRepo.create({
@@ -121,12 +121,22 @@ async function seed(): Promise<SeedResult> {
     const statistics = residentStatisticRepo.create({
       totalPayments: faker.number.int({ min: 0, max: 24 }),
       totalPaid: faker.number.float({ min: 0, max: 10000, fractionDigits: 2 }),
-      avgPaymentDelayDays: faker.number.float({ min: 0, max: 10, fractionDigits: 2 }),
-      lastPaymentDate: randomDateInYear(currentYear).toISOString().split('T')[0],
+      avgPaymentDelayDays: faker.number.float({
+        min: 0,
+        max: 10,
+        fractionDigits: 2,
+      }),
+      lastPaymentDate: randomDateInYear(currentYear)
+        .toISOString()
+        .split('T')[0],
       maintenanceRequests: faker.number.int({ min: 0, max: 5 }),
       delinquenciesCount: faker.number.int({ min: 0, max: 3 }),
       balanceOwed: faker.number.float({ min: 0, max: 5000, fractionDigits: 2 }),
-      delinquencyRate: faker.number.float({ min: 0, max: 100, fractionDigits: 2 }),
+      delinquencyRate: faker.number.float({
+        min: 0,
+        max: 100,
+        fractionDigits: 2,
+      }),
     });
     await residentStatisticRepo.save(statistics);
 
@@ -141,7 +151,10 @@ async function seed(): Promise<SeedResult> {
       primaryContact,
       lease,
       statistics,
-      tags: faker.helpers.arrayElements(['VIP', 'PetFriendly'], { min: 0, max: 2 }),
+      tags: faker.helpers.arrayElements(['VIP', 'PetFriendly'], {
+        min: 0,
+        max: 2,
+      }),
       internalNotes: faker.lorem.sentence(),
     });
     await residentRepo.save(resident);
@@ -160,8 +173,16 @@ async function seed(): Promise<SeedResult> {
     await residentContactRepo.save(emergency);
 
     const documents = [
-      residentDocumentRepo.create({ type: 'LEASE', url: faker.internet.url(), resident }),
-      residentDocumentRepo.create({ type: 'ID', url: faker.internet.url(), resident }),
+      residentDocumentRepo.create({
+        type: 'LEASE',
+        url: faker.internet.url(),
+        resident,
+      }),
+      residentDocumentRepo.create({
+        type: 'ID',
+        url: faker.internet.url(),
+        resident,
+      }),
     ];
     await residentDocumentRepo.save(documents);
 

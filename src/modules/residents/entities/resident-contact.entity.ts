@@ -9,7 +9,11 @@ export class ResidentContact {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'enum', enum: ['PRIMARY', 'EMERGENCY'], default: 'PRIMARY' })
+  @Column({
+    type: 'simple-enum',
+    enum: ['PRIMARY', 'EMERGENCY'],
+    default: 'PRIMARY',
+  })
   type: ContactType;
 
   @Column()
