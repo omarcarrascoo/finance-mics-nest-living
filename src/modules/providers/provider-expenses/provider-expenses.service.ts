@@ -15,13 +15,15 @@ export class ProviderExpensesService {
   }
 
   findAll() {
-    return this.expensesRepo.find({ relations: ['serviceCategory'] });
+    return this.expensesRepo.find({
+      relations: ['serviceCategory', 'provider'],
+    });
   }
 
   findOne(id: string) {
     return this.expensesRepo.findOne({
       where: { id },
-      relations: ['serviceCategory'],
+      relations: ['serviceCategory', 'provider'],
     });
   }
 

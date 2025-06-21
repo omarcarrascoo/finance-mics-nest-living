@@ -137,6 +137,8 @@ export class ReportsService {
   async providerExpensesReport(start: Date, end: Date) {
     return this.providerRepo.find({
       where: { expenseDate: Between(start, end) },
+      relations: ['serviceCategory', 'provider'], // <— aquí agregamos las relaciones
+      order: { expenseDate: 'ASC' }, // opcional: ordenar por fecha
     });
   }
 
