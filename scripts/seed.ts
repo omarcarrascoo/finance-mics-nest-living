@@ -20,7 +20,9 @@ import { Maintenance } from '../src/modules/maintenance/entities/maintenance.ent
 import { ExtraordinaryExpense } from '../src/modules/extraordinary-expenses/entities/extraordinary-expense.entity';
 import { ReserveFundTransaction } from '../src/modules/reserve-fund-transactions/entities/reserve-fund-transaction.entity';
 import { BankTransaction } from '../src/modules/bank-reconciliation/entities/bank-transaction.entity';
-import { ProviderExpense } from 'src/modules/providers/entities/provider-expense.entity';
+import { Provider } from '../src/modules/providers/entities/provider.entity';
+import { DocumentType } from '../src/modules/providers/entities/provider-document.entity';
+import { ProviderExpense } from '../src/modules/providers/entities/provider-expense.entity';
 
 // seed.ts
 const dataSource = new DataSource({
@@ -53,6 +55,7 @@ async function seed(): Promise<SeedResult> {
   const paymentRepo = dataSource.getRepository(Payment);
   const budgetRepo = dataSource.getRepository(Budget);
   const budgetItemRepo = dataSource.getRepository(BudgetItem);
+  const providerRepo = dataSource.getRepository(Provider);
   const providerExpenseRepo = dataSource.getRepository(ProviderExpense);
   const delinquencyRepo = dataSource.getRepository(Delinquency);
   const maintenanceRepo = dataSource.getRepository(Maintenance);
@@ -159,29 +162,113 @@ async function seed(): Promise<SeedResult> {
     await budgetItemRepo.save(budgetItems);
   }
 
+  // --- Providers ---
+  const providers: Provider[] = [];
+  for (let i = 0; i < 8; i++) {
+    const name = faker.company.name();
+    const serviceType = faker.helpers.arrayElement(categories);
+    const start = randomDateInYear(currentYear - 1);
+    const maybeEnd = faker.datatype.boolean()
+      ? randomDateInYear(currentYear + 1)
+      : undefined;
+    providers.push(
+      providerRepo.create({
+        name,
+        legalName: `${name} S.A. de C.V.`,
+        serviceType,
+        contact: {
+          contactName: faker.person.fullName(),
+          phone: faker.phone.number(),
+          email: faker.internet.email(),
+          website: faker.internet.url(),
+          address: faker.location.streetAddress(),
+          regionsServed: [faker.location.city(), faker.location.city()],
+        },
+        contract: {
+          startDate: start.toISOString().split('T')[0],
+          endDate: maybeEnd ? maybeEnd.toISOString().split('T')[0] : undefined,
+          paymentTerms: faker.helpers.arrayElement(['Net30', 'Net45', 'Net60']),
+          currency: faker.helpers.arrayElement(['MXN', 'USD']),
+          rfc: faker.string.alphanumeric({ length: 13, casing: 'upper' }),
+          bankAccount: faker.finance.accountNumber(18),
+        },
+        documents: [
+          {
+            type: DocumentType.CONTRACT,
+            url: faker.internet.url(),
+          },
+        ],
+        statistics: {
+          totalServices: faker.number.int({ min: 1, max: 40 }),
+          totalSpend: faker.number.float({
+            min: 1000,
+            max: 50000,
+            fractionDigits: 2,
+          }),
+          avgCostPerService: faker.number.float({
+            min: 100,
+            max: 2000,
+            fractionDigits: 2,
+          }),
+          avgRating: faker.number.float({
+            min: 3,
+            max: 5,
+            fractionDigits: 2,
+          }),
+          onTimeRate: faker.number.float({
+            min: 75,
+            max: 100,
+            fractionDigits: 2,
+          }),
+          avgResponseTimeHrs: faker.number.float({
+            min: 1,
+            max: 24,
+            fractionDigits: 2,
+          }),
+          lastServiceDate: randomDateInYear(currentYear)
+            .toISOString()
+            .split('T')[0],
+          delayRate: faker.number.float({
+            min: 0,
+            max: 20,
+            fractionDigits: 2,
+          }),
+          pendingInvoices: faker.number.int({ min: 0, max: 5 }),
+        },
+        tags: faker.helpers.arrayElements(['VIP', '24/7', 'priority'], {
+          min: 0,
+          max: 2,
+        }),
+        internalNotes: faker.lorem.sentence(),
+      }),
+    );
+  }
+  await providerRepo.save(providers);
+
   // --- Provider Expenses ---
-  // const providerExpenses: ProviderExpense[] = [];
-  // for (let month = 0; month < 12; month++) {
-  //   const count = faker.number.int({ min: 1, max: 3 });
-  //   for (let i = 0; i < count; i++) {
-  //     const providerName = faker.company.name();
-  //     const serviceCategory = faker.helpers.arrayElement(categories);
-  //     const totalAmount = faker.number.float({
-  //       min: 200,
-  //       max: 2000,
-  //       fractionDigits: 2,
-  //     });
-  //     providerExpenses.push(
-  //       providerExpenseRepo.create({
-  //         providerName,
-  //         serviceCategory,
-  //         totalAmount,
-  //         expenseDate: randomDateInMonth(currentYear, month),
-  //       }),
-  //     );
-  //   }
-  // }
-  // await providerExpenseRepo.save(providerExpenses);
+  const providerExpenses: ProviderExpense[] = [];
+  providers.forEach((provider) => {
+    for (let month = 0; month < 12; month++) {
+      const count = faker.number.int({ min: 0, max: 2 });
+      for (let i = 0; i < count; i++) {
+        const serviceCategory = faker.helpers.arrayElement(categories);
+        const totalAmount = faker.number.float({
+          min: 200,
+          max: 2000,
+          fractionDigits: 2,
+        });
+        providerExpenses.push(
+          providerExpenseRepo.create({
+            provider,
+            serviceCategory,
+            totalAmount,
+            expenseDate: randomDateInMonth(currentYear, month),
+          }),
+        );
+      }
+    }
+  });
+  await providerExpenseRepo.save(providerExpenses);
 
   // --- Delinquencies ---
   const delinquencies: Delinquency[] = [];
