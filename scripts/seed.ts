@@ -23,6 +23,29 @@ import { BankTransaction } from '../src/modules/bank-reconciliation/entities/ban
 import { Provider } from '../src/modules/providers/entities/provider.entity';
 import { DocumentType } from '../src/modules/providers/entities/provider-document.entity';
 import { ProviderExpense } from '../src/modules/providers/entities/provider-expense.entity';
+import {
+  Employee,
+  EmployeeType,
+} from '../src/modules/employees/entities/employee.entity';
+import {
+  EmployeeFiscal,
+  TaxRegime,
+} from '../src/modules/employees/entities/employee-fiscal.entity';
+import { EmployeeSocialSecurity } from '../src/modules/employees/entities/employee-ssn.entity';
+import { EmployeeContract } from '../src/modules/employees/entities/employee-contract.entity';
+import {
+  EmployeeSalary,
+  SalaryType,
+  PayFrequency,
+} from '../src/modules/employees/entities/employee-salary.entity';
+import { EmployeeWorkSchedule } from '../src/modules/employees/entities/employee-work-schedule.entity';
+import { EmployeePayrollRecord } from '../src/modules/employees/entities/employee-payroll.entity';
+import { EmployeeLeaveBalance } from '../src/modules/employees/entities/employee-leave.entity';
+import {
+  EmployeeAbsence,
+  AbsenceType,
+} from '../src/modules/employees/entities/employee-absence.entity';
+import { PaymentKind, PaymentStatus } from '../src/modules/payments/entities/payment.enums';
 
 // seed.ts
 const dataSource = new DataSource({
@@ -67,6 +90,16 @@ async function seed(): Promise<SeedResult> {
     dataSource.getRepository(ExtraordinaryExpense);
   const reserveFundRepo = dataSource.getRepository(ReserveFundTransaction);
   const bankTransactionRepo = dataSource.getRepository(BankTransaction);
+  const employeeRepo = dataSource.getRepository(Employee);
+  const employeeFiscalRepo = dataSource.getRepository(EmployeeFiscal);
+  const employeeSSNRepo = dataSource.getRepository(EmployeeSocialSecurity);
+  const employeeContractRepo = dataSource.getRepository(EmployeeContract);
+  const employeeSalaryRepo = dataSource.getRepository(EmployeeSalary);
+  const employeeWorkScheduleRepo =
+    dataSource.getRepository(EmployeeWorkSchedule);
+  const employeePayrollRepo = dataSource.getRepository(EmployeePayrollRecord);
+  const employeeLeaveRepo = dataSource.getRepository(EmployeeLeaveBalance);
+  const employeeAbsenceRepo = dataSource.getRepository(EmployeeAbsence);
 
   const currentYear: number = new Date().getFullYear();
 
@@ -82,6 +115,114 @@ async function seed(): Promise<SeedResult> {
     categoryData as Category[],
   );
   await categoryRepo.save(categories);
+
+  // --- Employees ---
+  const employees: Employee[] = [];
+  for (let i = 0; i < 5; i++) {
+    const firstName = faker.person.firstName();
+    const lastName = faker.person.lastName();
+    const hireDateObj = randomDateInYear(currentYear - 1);
+    const hireDate = hireDateObj.toISOString().split('T')[0];
+    const terminationDate = faker.datatype.boolean()
+      ? randomDateInYear(currentYear).toISOString().split('T')[0]
+      : undefined;
+
+    const fiscal = employeeFiscalRepo.create({
+      rfc: faker.string.alphanumeric({ length: 13, casing: 'upper' }),
+      taxRegime: faker.helpers.arrayElement(Object.values(TaxRegime)),
+      fiscalAddress: faker.location.streetAddress(),
+      cfdiUse: 'G03',
+    });
+    await employeeFiscalRepo.save(fiscal);
+
+    const ssn = employeeSSNRepo.create({
+      imssNumber: faker.string.numeric(11),
+      registrationDate: hireDate,
+      regime: faker.helpers.arrayElement(['Obligatorio', 'Voluntario']),
+    });
+    await employeeSSNRepo.save(ssn);
+
+    const contract = employeeContractRepo.create({
+      position: faker.person.jobTitle(),
+      department: faker.commerce.department(),
+      contractStart: hireDate,
+      contractEnd: terminationDate,
+      probationPeriod: true,
+      probationEndDate: faker
+        .date
+        .soon({ days: 90, refDate: hireDateObj })
+        .toISOString()
+        .split('T')[0],
+    });
+    await employeeContractRepo.save(contract);
+
+    const baseSalary = faker.number.float({
+      min: 8000,
+      max: 20000,
+      fractionDigits: 2,
+    });
+    const salary = employeeSalaryRepo.create({
+      baseSalary,
+      salaryType: faker.helpers.arrayElement(Object.values(SalaryType)),
+      frequency: faker.helpers.arrayElement(Object.values(PayFrequency)),
+      bankAccount: faker.finance.accountNumber(18),
+    });
+    await employeeSalaryRepo.save(salary);
+
+    const workSchedule = employeeWorkScheduleRepo.create({
+      daysOfWeek: ['MON', 'TUE', 'WED', 'THU', 'FRI'],
+      shiftStart: '08:00',
+      shiftEnd: '17:00',
+      hoursPerDay: 8,
+    });
+    await employeeWorkScheduleRepo.save(workSchedule);
+
+    const leaveBalance = employeeLeaveRepo.create({
+      vacationDaysAccrued: 10,
+      vacationDaysTaken: 0,
+      sickDaysAccrued: 5,
+      sickDaysTaken: 0,
+      totalAbsenceDays: 0,
+    });
+    await employeeLeaveRepo.save(leaveBalance);
+
+    const employee = employeeRepo.create({
+      firstName,
+      lastName,
+      email: faker.internet.email({ firstName, lastName }),
+      phone: faker.phone.number(),
+      type: faker.helpers.arrayElement(Object.values(EmployeeType)),
+      hireDate,
+      terminationDate,
+      isActive: !terminationDate,
+      fiscal,
+      socialSecurity: ssn,
+      contract,
+      salary,
+      workSchedule,
+      leaveBalance,
+      tags: faker.helpers.arrayElements(['remote', 'manager', 'onsite'], {
+        min: 0,
+        max: 2,
+      }),
+      notes: faker.lorem.sentence(),
+    });
+    await employeeRepo.save(employee);
+
+    const payroll = employeePayrollRepo.create({
+      employee,
+      periodStart: hireDate,
+      periodEnd: hireDate,
+      grossPay: baseSalary / 12,
+      totalDeductions: (baseSalary / 12) * 0.1,
+      netPay: (baseSalary / 12) * 0.9,
+      payDate: hireDate,
+      reference: faker.finance.transactionId(),
+    });
+    await employeePayrollRepo.save(payroll);
+
+    employees.push(employee);
+  }
 
   // --- Residents ---
   const residents: Resident[] = [];
@@ -145,6 +286,7 @@ async function seed(): Promise<SeedResult> {
       unitNumber: unit,
       email,
       phone,
+      alternatePhone: faker.phone.number(),
       moveInDate: moveIn,
       moveOutDate: maybeMoveOut,
       status: 'ACTIVE',
@@ -209,32 +351,67 @@ async function seed(): Promise<SeedResult> {
 
   // --- Payments ---
   const payments: Payment[] = [];
+
+  // Resident fee payments
   residents.forEach((resident: Resident) => {
     for (let month = 0; month < 12; month++) {
-      const numPayments = faker.number.int({ min: 0, max: 2 });
-      for (let j = 0; j < numPayments; j++) {
-        const category = faker.helpers.arrayElement(categories);
-        const amount = faker.number.float({
-          min: 50,
-          max: 500,
-          fractionDigits: 2,
-        });
-        const method = faker.helpers.arrayElement(
-          Object.values(PaymentMethod),
-        ) as PaymentMethod;
-        payments.push(
-          paymentRepo.create({
-            resident,
-            category,
-            amount,
-            method,
-            paymentDate: randomDateInMonth(currentYear, month),
+      const dueDate = new Date(currentYear, month, 5);
+      const grossAmount = faker.number.float({
+        min: 50,
+        max: 300,
+        fractionDigits: 2,
+      });
+      const taxAmount = Number((grossAmount * 0.16).toFixed(2));
+      const netAmount = grossAmount + taxAmount;
+      payments.push(
+        paymentRepo.create({
+          kind: PaymentKind.RESIDENT_FEE,
+          resident,
+          category: faker.helpers.arrayElement(categories),
+          grossAmount,
+          taxAmount,
+          discountAmount: 0,
+          netAmount,
+          currency: 'MXN',
+          method: faker.helpers.arrayElement(
+            Object.values(PaymentMethod),
+          ) as PaymentMethod,
+          status: PaymentStatus.COMPLETED,
+          referenceNumber: faker.finance.transactionId(),
+          invoiceUrl: faker.internet.url(),
+          dueDate,
+          paymentDate: randomDateInMonth(currentYear, month),
+          tags: faker.helpers.arrayElements(['maintenance', 'online'], {
+            min: 0,
+            max: 1,
           }),
-        );
-      }
+        }),
+      );
     }
   });
-  await paymentRepo.save(payments);
+
+  // Payroll payments for employees
+  employees.forEach((employee) => {
+    const base = employee.salary.baseSalary / 12;
+    const deductions = base * 0.1;
+    const net = base - deductions;
+    payments.push(
+      paymentRepo.create({
+        kind: PaymentKind.PAYROLL,
+        employee,
+        grossAmount: base,
+        taxAmount: 0,
+        discountAmount: deductions,
+        netAmount: net,
+        currency: 'MXN',
+        method: PaymentMethod.TRANSFER,
+        status: PaymentStatus.COMPLETED,
+        referenceNumber: faker.finance.transactionId(),
+        paymentDate: new Date(employee.hireDate),
+      }),
+    );
+  });
+
 
   // --- Budgets and Items ---
   for (let year = currentYear - 1; year <= currentYear; year++) {
@@ -369,6 +546,32 @@ async function seed(): Promise<SeedResult> {
     }
   });
   await providerExpenseRepo.save(providerExpenses);
+
+  // Create payments for provider expenses
+  providerExpenses.forEach((expense) => {
+    const grossAmount = expense.totalAmount;
+    const taxAmount = Number((grossAmount * 0.16).toFixed(2));
+    const netAmount = grossAmount + taxAmount;
+    payments.push(
+      paymentRepo.create({
+        kind: PaymentKind.PROVIDER,
+        provider: expense.provider,
+        category: expense.serviceCategory,
+        grossAmount,
+        taxAmount,
+        discountAmount: 0,
+        netAmount,
+        currency: expense.provider.contract.currency,
+        method: PaymentMethod.TRANSFER,
+        status: PaymentStatus.COMPLETED,
+        referenceNumber: faker.finance.transactionId(),
+        invoiceUrl: faker.internet.url(),
+      paymentDate: expense.expenseDate,
+      }),
+    );
+  });
+
+  await paymentRepo.save(payments);
 
   // --- Delinquencies ---
   const delinquencies: Delinquency[] = [];
