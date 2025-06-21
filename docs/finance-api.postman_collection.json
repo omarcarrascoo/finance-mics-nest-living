@@ -18,7 +18,7 @@
             "header": [{"key": "Content-Type", "value": "application/json"}],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"resident\": \"<residentId>\",\n  \"category\": \"<categoryId>\",\n  \"amount\": 100,\n  \"method\": \"TRANSFER\"\n}"
+              "raw": "{\n  \"kind\": \"RESIDENT_FEE\",\n  \"resident\": \"<residentId>\",\n  \"category\": \"<categoryId>\",\n  \"grossAmount\": 100,\n  \"taxAmount\": 16,\n  \"discountAmount\": 0,\n  \"netAmount\": 116,\n  \"method\": \"TRANSFER\",\n  \"status\": \"COMPLETED\"\n}"
             },
             "url": "{{baseUrl}}/payments"
           }
@@ -49,7 +49,7 @@
           "request": {
             "method": "POST",
             "header": [{"key":"Content-Type","value":"application/json"}],
-            "body": {"mode":"raw","raw":"{\n  \"name\": \"John Doe\",\n  \"unitNumber\": \"A1\",\n  \"email\": \"john@example.com\"\n}"},
+            "body": {"mode":"raw","raw":"{\n  \"name\": \"John Doe\",\n  \"unitNumber\": \"A1\",\n  \"email\": \"john@example.com\",\n  \"alternatePhone\": \"5551234567\"\n}"},
             "url": "{{baseUrl}}/residents"
           }
         }
@@ -79,7 +79,7 @@
           "request": {
             "method": "POST",
             "header": [{"key":"Content-Type","value":"application/json"}],
-            "body": {"mode":"raw","raw":"{\n  \"providerName\": \"CleanCo\",\n  \"serviceCategory\": \"<categoryId>\",\n  \"totalAmount\": 300\n}"},
+            "body": {"mode":"raw","raw":"{\n  \"provider\": \"<providerId>\",\n  \"serviceCategory\": \"<categoryId>\",\n  \"totalAmount\": 300\n}"},
             "url": "{{baseUrl}}/provider-expenses"
           }
         }
@@ -141,6 +141,52 @@
             "header": [{"key":"Content-Type","value":"application/json"}],
             "body": {"mode":"raw","raw":"{\n  \"bankDate\": \"2025-01-01\",\n  \"bankAmount\": 500,\n  \"matched\": false\n}"},
             "url": "{{baseUrl}}/bank-transactions"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Providers",
+      "item": [
+        { "name": "Get all providers", "request": { "method": "GET", "url": "{{baseUrl}}/providers" } },
+        {
+          "name": "Create provider",
+          "request": {
+            "method": "POST",
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": {"mode":"raw","raw":"{\n  \"name\": \"ACME Services\",\n  \"serviceType\": \"<categoryId>\"\n}"},
+            "url": "{{baseUrl}}/providers"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Employees",
+      "item": [
+        { "name": "Get all employees", "request": { "method": "GET", "url": "{{baseUrl}}/employees" } },
+        {
+          "name": "Create employee",
+          "request": {
+            "method": "POST",
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": {"mode":"raw","raw":"{\n  \"firstName\": \"Luis\",\n  \"lastName\": \"Perez\",\n  \"type\": \"FULL_TIME\"\n}"},
+            "url": "{{baseUrl}}/employees"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Maintenance",
+      "item": [
+        { "name": "Get all maintenance", "request": { "method": "GET", "url": "{{baseUrl}}/maintenance" } },
+        { "name": "Get overdue", "request": { "method": "GET", "url": "{{baseUrl}}/maintenance/overdue" } },
+        {
+          "name": "Create maintenance",
+          "request": {
+            "method": "POST",
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": {"mode":"raw","raw":"{\n  \"resident\": \"<residentId>\",\n  \"amount\": 100\n}"},
+            "url": "{{baseUrl}}/maintenance"
           }
         }
       ]
