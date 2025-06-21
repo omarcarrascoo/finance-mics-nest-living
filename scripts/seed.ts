@@ -64,6 +64,8 @@ async function seed(): Promise<SeedResult> {
   const reserveFundRepo = dataSource.getRepository(ReserveFundTransaction);
   const bankTransactionRepo = dataSource.getRepository(BankTransaction);
 
+  const currentYear: number = new Date().getFullYear();
+
   // --- Categories ---
   const categoryData: Array<Partial<Category>> = [
     { name: 'Maintenance', type: CategoryType.MAINTENANCE },
@@ -84,15 +86,95 @@ async function seed(): Promise<SeedResult> {
     const unit = `${faker.string.alpha({ length: 1 }).toUpperCase()}${faker.number.int({ min: 1, max: 50 })}`;
     const [firstName, lastName] = fullName.split(' ');
     const email = faker.internet.email({ firstName, lastName });
+    const phone = faker.phone.number();
+    const moveIn = randomDateInYear(currentYear - 1)
+      .toISOString()
+      .split('T')[0];
+    const maybeMoveOut = faker.datatype.boolean()
+      ? randomDateInYear(currentYear + 1)
+          .toISOString()
+          .split('T')[0]
+      : undefined;
     residents.push(
-      residentRepo.create({ name: fullName, unitNumber: unit, email }),
+      residentRepo.create({
+        fullName,
+        unitNumber: unit,
+        email,
+        phone,
+        moveInDate: moveIn,
+        moveOutDate: maybeMoveOut,
+        status: 'ACTIVE',
+        primaryContact: {
+          type: 'PRIMARY',
+          name: fullName,
+          phone,
+          email,
+        },
+        emergencyContacts: [
+          {
+            type: 'EMERGENCY',
+            name: faker.person.fullName(),
+            relationship: faker.helpers.arrayElement([
+              'Friend',
+              'Parent',
+              'Sibling',
+            ]),
+            phone: faker.phone.number(),
+            email: faker.internet.email(),
+          },
+        ],
+        lease: {
+          startDate: moveIn,
+          endDate: maybeMoveOut,
+          rentAmount: faker.number.int({ min: 800, max: 1500 }),
+          securityDeposit: 1000,
+          leaseDocumentUrl: faker.internet.url(),
+          terms: faker.lorem.sentence(),
+        },
+        documents: [
+          { type: 'LEASE', url: faker.internet.url() },
+          { type: 'ID', url: faker.internet.url() },
+        ],
+        statistics: {
+          totalPayments: faker.number.int({ min: 0, max: 24 }),
+          totalPaid: faker.number.float({
+            min: 0,
+            max: 10000,
+            fractionDigits: 2,
+          }),
+          avgPaymentDelayDays: faker.number.float({
+            min: 0,
+            max: 10,
+            fractionDigits: 2,
+          }),
+          lastPaymentDate: randomDateInYear(currentYear)
+            .toISOString()
+            .split('T')[0],
+          maintenanceRequests: faker.number.int({ min: 0, max: 5 }),
+          delinquenciesCount: faker.number.int({ min: 0, max: 3 }),
+          balanceOwed: faker.number.float({
+            min: 0,
+            max: 5000,
+            fractionDigits: 2,
+          }),
+          delinquencyRate: faker.number.float({
+            min: 0,
+            max: 100,
+            fractionDigits: 2,
+          }),
+        },
+        tags: faker.helpers.arrayElements(['VIP', 'PetFriendly'], {
+          min: 0,
+          max: 2,
+        }),
+        internalNotes: faker.lorem.sentence(),
+      }),
     );
   }
   await residentRepo.save(residents);
 
   // --- Maintenance ---
   const maintenances: Maintenance[] = [];
-  const currentYear: number = new Date().getFullYear();
   residents.forEach((resident) => {
     for (let month = 0; month < 12; month++) {
       maintenances.push(
