@@ -20,6 +20,11 @@ import { BankTransaction } from '../src/modules/bank-reconciliation/entities/ban
 import { Provider } from '../src/modules/providers/entities/provider.entity';
 import { DocumentType } from '../src/modules/providers/entities/provider-document.entity';
 import { ProviderExpense } from '../src/modules/providers/entities/provider-expense.entity';
+import { Amenity } from '../src/modules/amenities/entities/amenity.entity';
+import {
+  Reservation,
+  ReservationStatus,
+} from '../src/modules/reservations/entities/reservation.entity';
 import {
   Employee,
   EmployeeType,
@@ -96,6 +101,8 @@ async function seed(): Promise<SeedResult> {
     dataSource.getRepository(EmployeeWorkSchedule);
   const employeePayrollRepo = dataSource.getRepository(EmployeePayrollRecord);
   const employeeLeaveRepo = dataSource.getRepository(EmployeeLeaveBalance);
+  const amenityRepo = dataSource.getRepository(Amenity);
+  const reservationRepo = dataSource.getRepository(Reservation);
 
   const currentYear: number = new Date().getFullYear();
 
@@ -111,6 +118,28 @@ async function seed(): Promise<SeedResult> {
     categoryData as Category[],
   );
   await categoryRepo.save(categories);
+
+  // --- Amenities ---
+  const amenities: Amenity[] = [];
+  for (let i = 0; i < 5; i++) {
+    amenities.push(
+      amenityRepo.create({
+        name: faker.commerce.productName(),
+        description: faker.lorem.sentence(),
+        location: faker.location.streetAddress(),
+        capacity: faker.number.int({ min: 5, max: 100 }),
+        price: faker.number.float({ min: 0, max: 500, fractionDigits: 2 }),
+        currency: 'MXN',
+        imageUrl: faker.internet.url(),
+        tags: faker.helpers.arrayElements(['indoor', 'outdoor', 'popular'], {
+          min: 0,
+          max: 2,
+        }),
+        isActive: true,
+      }),
+    );
+  }
+  await amenityRepo.save(amenities);
 
   // --- Employees ---
   const employees: Employee[] = [];
@@ -325,8 +354,33 @@ async function seed(): Promise<SeedResult> {
 
     resident.emergencyContacts = [emergency];
     resident.documents = documents;
-    residents.push(resident);
+  residents.push(resident);
   }
+
+  // --- Reservations ---
+  const reservations: Reservation[] = [];
+  residents.forEach((resident) => {
+    const count = faker.number.int({ min: 0, max: 2 });
+    for (let i = 0; i < count; i++) {
+      const amenity = faker.helpers.arrayElement(amenities);
+      const start = randomDateInYear(currentYear);
+      const end = new Date(start.getTime());
+      end.setHours(end.getHours() + faker.number.int({ min: 1, max: 4 }));
+      reservations.push(
+        reservationRepo.create({
+          resident,
+          amenity,
+          startTime: start,
+          endTime: end,
+          status: faker.helpers.arrayElement(
+            Object.values(ReservationStatus),
+          ) as ReservationStatus,
+          remarks: faker.lorem.sentence(),
+        }),
+      );
+    }
+  });
+  await reservationRepo.save(reservations);
 
   // --- Maintenance ---
   const maintenances: Maintenance[] = [];
@@ -403,6 +457,31 @@ async function seed(): Promise<SeedResult> {
         status: PaymentStatus.COMPLETED,
         referenceNumber: faker.string.uuid(),
         paymentDate: new Date(employee.hireDate),
+      }),
+    );
+  });
+
+  // Payments for amenity reservations
+  reservations.forEach((reservation) => {
+    const grossAmount = reservation.amenity.price;
+    const taxAmount = Number((grossAmount * 0.16).toFixed(2));
+    const netAmount = grossAmount + taxAmount;
+    payments.push(
+      paymentRepo.create({
+        kind: PaymentKind.AMENITY,
+        resident: reservation.resident,
+        reservation,
+        grossAmount,
+        taxAmount,
+        discountAmount: 0,
+        netAmount,
+        currency: reservation.amenity.currency,
+        method: faker.helpers.arrayElement(
+          Object.values(PaymentMethod),
+        ) as PaymentMethod,
+        status: PaymentStatus.COMPLETED,
+        referenceNumber: faker.string.uuid(),
+        paymentDate: reservation.startTime,
       }),
     );
   });
