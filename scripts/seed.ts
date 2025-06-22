@@ -9,10 +9,7 @@ import {
   Category,
   CategoryType,
 } from '../src/modules/categories/entities/category.entity';
-import {
-  Payment,
-  PaymentMethod,
-} from '../src/modules/payments/entities/payment.entity';
+import { Payment } from '../src/modules/payments/entities/payment.entity';
 import { Budget } from '../src/modules/budgets/entities/budget.entity';
 import { BudgetItem } from '../src/modules/budgets/entities/budget-item.entity';
 import { Delinquency } from '../src/modules/delinquencies/entities/delinquency.entity';
@@ -42,10 +39,10 @@ import { EmployeeWorkSchedule } from '../src/modules/employees/entities/employee
 import { EmployeePayrollRecord } from '../src/modules/employees/entities/employee-payroll.entity';
 import { EmployeeLeaveBalance } from '../src/modules/employees/entities/employee-leave.entity';
 import {
-  EmployeeAbsence,
-  AbsenceType,
-} from '../src/modules/employees/entities/employee-absence.entity';
-import { PaymentKind, PaymentStatus } from '../src/modules/payments/entities/payment.enums';
+  PaymentKind,
+  PaymentMethod,
+  PaymentStatus,
+} from '../src/modules/payments/entities/payment.enums';
 
 // seed.ts
 const dataSource = new DataSource({
@@ -99,7 +96,6 @@ async function seed(): Promise<SeedResult> {
     dataSource.getRepository(EmployeeWorkSchedule);
   const employeePayrollRepo = dataSource.getRepository(EmployeePayrollRecord);
   const employeeLeaveRepo = dataSource.getRepository(EmployeeLeaveBalance);
-  const employeeAbsenceRepo = dataSource.getRepository(EmployeeAbsence);
 
   const currentYear: number = new Date().getFullYear();
 
@@ -148,8 +144,7 @@ async function seed(): Promise<SeedResult> {
       contractStart: hireDate,
       contractEnd: terminationDate,
       probationPeriod: true,
-      probationEndDate: faker
-        .date
+      probationEndDate: faker.date
         .soon({ days: 90, refDate: hireDateObj })
         .toISOString()
         .split('T')[0],
@@ -217,7 +212,7 @@ async function seed(): Promise<SeedResult> {
       totalDeductions: (baseSalary / 12) * 0.1,
       netPay: (baseSalary / 12) * 0.9,
       payDate: hireDate,
-      reference: faker.finance.transactionId(),
+      reference: faker.string.uuid(),
     });
     await employeePayrollRepo.save(payroll);
 
@@ -377,7 +372,7 @@ async function seed(): Promise<SeedResult> {
             Object.values(PaymentMethod),
           ) as PaymentMethod,
           status: PaymentStatus.COMPLETED,
-          referenceNumber: faker.finance.transactionId(),
+          referenceNumber: faker.string.uuid(),
           invoiceUrl: faker.internet.url(),
           dueDate,
           paymentDate: randomDateInMonth(currentYear, month),
@@ -406,12 +401,11 @@ async function seed(): Promise<SeedResult> {
         currency: 'MXN',
         method: PaymentMethod.TRANSFER,
         status: PaymentStatus.COMPLETED,
-        referenceNumber: faker.finance.transactionId(),
+        referenceNumber: faker.string.uuid(),
         paymentDate: new Date(employee.hireDate),
       }),
     );
   });
-
 
   // --- Budgets and Items ---
   for (let year = currentYear - 1; year <= currentYear; year++) {
@@ -564,9 +558,9 @@ async function seed(): Promise<SeedResult> {
         currency: expense.provider.contract.currency,
         method: PaymentMethod.TRANSFER,
         status: PaymentStatus.COMPLETED,
-        referenceNumber: faker.finance.transactionId(),
+        referenceNumber: faker.string.uuid(),
         invoiceUrl: faker.internet.url(),
-      paymentDate: expense.expenseDate,
+        paymentDate: expense.expenseDate,
       }),
     );
   });

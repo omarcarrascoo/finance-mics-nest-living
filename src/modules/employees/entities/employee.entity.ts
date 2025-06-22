@@ -43,7 +43,7 @@ export class Employee {
   @Column({ nullable: true })
   phone?: string;
 
-  @Column({ type: 'enum', enum: EmployeeType })
+  @Column({ type: 'simple-enum', enum: EmployeeType })
   type: EmployeeType;
 
   @Column({ type: 'date' })

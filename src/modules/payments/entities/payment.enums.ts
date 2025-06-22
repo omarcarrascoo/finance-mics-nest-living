@@ -8,11 +8,12 @@ export enum PaymentMethod {
 }
 
 export enum PaymentKind {
-  RESIDENT_FEE = 'RESIDENT_FEE', // cobros de mantenimiento, cuotas, etc.
+  RESIDENT_FEE = 'RESIDENT_FEE', // cuotas, mantenimiento
   PROVIDER = 'PROVIDER', // pagos a proveedores
-  PAYROLL = 'PAYROLL', // nómina y honorarios
-  TAX = 'TAX', // impuestos y contribuciones
-  EXTRAORDINARY = 'EXTRAORDINARY', // gastos imprevistos / eventos
+  PAYROLL = 'PAYROLL', // nómina
+  TAX = 'TAX', // impuestos
+  EXTRAORDINARY = 'EXTRAORDINARY', // eventos, imprevistos
+  AMENITY = 'AMENITY', // reservas de amenidades
   OTHER = 'OTHER',
 }
 

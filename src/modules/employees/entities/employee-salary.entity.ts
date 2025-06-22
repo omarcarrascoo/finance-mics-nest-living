@@ -21,10 +21,10 @@ export class EmployeeSalary {
   @Column('decimal', { precision: 12, scale: 2 })
   baseSalary: number;
 
-  @Column({ type: 'enum', enum: SalaryType })
+  @Column({ type: 'simple-enum', enum: SalaryType })
   salaryType: SalaryType;
 
-  @Column({ type: 'enum', enum: PayFrequency })
+  @Column({ type: 'simple-enum', enum: PayFrequency })
   frequency: PayFrequency;
 
   @Column({ nullable: true })
