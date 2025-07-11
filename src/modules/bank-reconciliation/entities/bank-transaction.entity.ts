@@ -1,10 +1,14 @@
 // src/modules/bank-reconciliation/transaction.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Condo } from '../../condos/entities/condo.entity';
 
 @Entity()
 export class BankTransaction {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @ManyToOne(() => Condo)
+  condo: Condo;
 
   @Column()
   bankDate: Date;

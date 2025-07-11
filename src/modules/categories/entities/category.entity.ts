@@ -1,5 +1,6 @@
 // src/modules/categories/category.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Condo } from '../../condos/entities/condo.entity';
 
 export enum CategoryType {
   MAINTENANCE = 'maintenance',
@@ -11,6 +12,9 @@ export enum CategoryType {
 export class Category {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @ManyToOne(() => Condo)
+  condo: Condo;
 
   @Column()
   name: string;

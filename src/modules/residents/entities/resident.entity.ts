@@ -5,8 +5,10 @@ import {
   Column,
   OneToOne,
   OneToMany,
+  ManyToOne,
   JoinColumn,
 } from 'typeorm';
+import { Condo } from '../../condos/entities/condo.entity';
 import { ResidentContact } from './resident-contact.entity';
 import { ResidentLease } from './resident-lease.entity';
 import { ResidentDocument } from './resident-document.entity';
@@ -20,6 +22,9 @@ import { Delinquency } from '../../delinquencies/entities/delinquency.entity';
 export class Resident {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @ManyToOne(() => Condo)
+  condo: Condo;
 
   // — Datos básicos —
   @Column()

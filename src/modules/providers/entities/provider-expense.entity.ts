@@ -9,11 +9,15 @@ import {
 } from 'typeorm';
 import { Category } from '../../categories/entities/category.entity';
 import { Provider } from './provider.entity';
+import { Condo } from '../../condos/entities/condo.entity';
 
 @Entity('provider_expenses')
 export class ProviderExpense {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @ManyToOne(() => Condo)
+  condo: Condo;
 
   @ManyToOne(() => Provider, (p) => p.expenses, { onDelete: 'CASCADE' })
   @JoinColumn()
