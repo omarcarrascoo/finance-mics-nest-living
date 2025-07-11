@@ -15,13 +15,13 @@ export class ResidentsService {
   }
 
   findAll() {
-    return this.residentsRepo.find({ relations: ['payments'] });
+    return this.residentsRepo.find({ relations: ['payments', 'reservations'] });
   }
 
   findOne(id: string) {
     return this.residentsRepo.findOne({
       where: { id },
-      relations: ['payments'],
+      relations: ['payments', 'reservations'],
     });
   }
 
