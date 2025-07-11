@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 // src/modules/payments/entities/payment.entity.ts
 import {
   Entity,
@@ -21,7 +20,7 @@ export class Payment {
   id: string;
 
   // — Tipo de flujo —
-  @Column({ type: 'enum', enum: PaymentKind })
+  @Column({ type: 'simple-enum', enum: PaymentKind })
   kind: PaymentKind;
 
   // — Relaciones opcionales —
@@ -63,7 +62,7 @@ export class Payment {
   currency: string;
 
   // — Metadatos —
-  @Column({ type: 'enum', enum: PaymentMethod })
+  @Column({ type: 'simple-enum', enum: PaymentMethod })
   method: PaymentMethod;
 
   @Column({
