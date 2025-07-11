@@ -11,6 +11,7 @@ import { Resident } from '../../residents/entities/resident.entity';
 import { Provider } from '../../providers/entities/provider.entity';
 import { Employee } from '../../employees/entities/employee.entity';
 import { Category } from '../../categories/entities/category.entity';
+import { Reservation } from '../../reservations/entities/reservation.entity';
 import { PaymentMethod, PaymentKind, PaymentStatus } from './payment.enums';
 
 @Entity('payments')
@@ -18,11 +19,11 @@ export class Payment {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  // — Tipo y flujo —
-  @Column({ type: 'enum', enum: PaymentKind })
+  // — Tipo de flujo —
+  @Column({ type: 'simple-enum', enum: PaymentKind })
   kind: PaymentKind;
 
-  // — Relaciones opcionales según el tipo —
+  // — Relaciones opcionales —
   @ManyToOne(() => Resident, (r) => r.payments, { nullable: true })
   @JoinColumn()
   resident?: Resident;
@@ -35,60 +36,64 @@ export class Payment {
   @JoinColumn()
   employee?: Employee;
 
-  // — Centro de costo o categoría general —
+  @ManyToOne(() => Reservation, (res) => res.payments, { nullable: true })
+  @JoinColumn()
+  reservation?: Reservation;
+
+  // — Centro de costo o categoría —
   @ManyToOne(() => Category, { nullable: true, eager: true })
   @JoinColumn()
   category?: Category;
 
-  // — Montos detallados para análisis de merma/kpis —
+  // — Montos desglosados —
   @Column('decimal', { precision: 12, scale: 2 })
-  grossAmount: number; // antes de impuestos o descuentos
+  grossAmount: number;
 
   @Column('decimal', { precision: 12, scale: 2, default: 0 })
-  taxAmount: number; // IVA u otros impuestos
+  taxAmount: number;
 
   @Column('decimal', { precision: 12, scale: 2, default: 0 })
-  discountAmount: number; // descuentos, retenciones, retenciones ISR
+  discountAmount: number;
 
   @Column('decimal', { precision: 12, scale: 2 })
-  netAmount: number; // importe efectivo final
+  netAmount: number;
 
   @Column({ length: 3, default: 'MXN' })
-  currency: string; // ISO currency code
+  currency: string;
 
-  // — Metadatos y trazabilidad —
+  // — Metadatos —
   @Column({ type: 'simple-enum', enum: PaymentMethod })
-  method: PaymentMethod; // transferencia, tarjeta, efectivo, cheque…
+  method: PaymentMethod;
 
   @Column({
     type: 'simple-enum',
     enum: PaymentStatus,
     default: PaymentStatus.COMPLETED,
   })
-  status: PaymentStatus; // pendiente, completado, fallido
+  status: PaymentStatus;
 
   @Column({ nullable: true })
-  referenceNumber?: string; // folio de factura, cheque, transacción
+  referenceNumber?: string;
 
   @Column({ nullable: true })
-  invoiceUrl?: string; // enlace a PDF / imagen de comprobante
+  invoiceUrl?: string;
 
   @Column({ type: 'date', nullable: true })
-  dueDate?: Date; // fecha de vencimiento (por ejemplo cuotas)
+  dueDate?: Date;
 
-  @Column({ type: 'timestamp', nullable: true })
-  paymentDate?: Date; // momento en que se efectuó
+  @Column({ type: 'date', nullable: true })
+  paymentDate?: Date;
 
-  @CreateDateColumn()
-  createdAt: Date; // registro en base de datos
+  @CreateDateColumn({ type: 'date' })
+  createdAt: Date;
 
-  // — Campos adicionales para escalabilidad —
-  @Column({ type: 'timestamp', nullable: true })
-  scheduledAt?: Date; // fecha/hora agendada si es pago futuro
+  // — Opcionales futuros —
+  @Column({ type: 'date', nullable: true })
+  scheduledAt?: Date;
 
   @Column('simple-array', { nullable: true })
-  tags?: string[]; // p.ej. ["urgente","recurrente"]
+  tags?: string[];
 
   @Column({ type: 'text', nullable: true })
-  notes?: string; // anotaciones libres
+  notes?: string;
 }

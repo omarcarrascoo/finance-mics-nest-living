@@ -9,10 +9,7 @@ import {
   Category,
   CategoryType,
 } from '../src/modules/categories/entities/category.entity';
-import {
-  Payment,
-  PaymentMethod,
-} from '../src/modules/payments/entities/payment.entity';
+import { Payment } from '../src/modules/payments/entities/payment.entity';
 import { Budget } from '../src/modules/budgets/entities/budget.entity';
 import { BudgetItem } from '../src/modules/budgets/entities/budget-item.entity';
 import { Delinquency } from '../src/modules/delinquencies/entities/delinquency.entity';
@@ -23,6 +20,11 @@ import { BankTransaction } from '../src/modules/bank-reconciliation/entities/ban
 import { Provider } from '../src/modules/providers/entities/provider.entity';
 import { DocumentType } from '../src/modules/providers/entities/provider-document.entity';
 import { ProviderExpense } from '../src/modules/providers/entities/provider-expense.entity';
+import { Amenity } from '../src/modules/amenities/entities/amenity.entity';
+import {
+  Reservation,
+  ReservationStatus,
+} from '../src/modules/reservations/entities/reservation.entity';
 import {
   Employee,
   EmployeeType,
@@ -42,10 +44,10 @@ import { EmployeeWorkSchedule } from '../src/modules/employees/entities/employee
 import { EmployeePayrollRecord } from '../src/modules/employees/entities/employee-payroll.entity';
 import { EmployeeLeaveBalance } from '../src/modules/employees/entities/employee-leave.entity';
 import {
-  EmployeeAbsence,
-  AbsenceType,
-} from '../src/modules/employees/entities/employee-absence.entity';
-import { PaymentKind, PaymentStatus } from '../src/modules/payments/entities/payment.enums';
+  PaymentKind,
+  PaymentMethod,
+  PaymentStatus,
+} from '../src/modules/payments/entities/payment.enums';
 
 // seed.ts
 const dataSource = new DataSource({
@@ -99,7 +101,8 @@ async function seed(): Promise<SeedResult> {
     dataSource.getRepository(EmployeeWorkSchedule);
   const employeePayrollRepo = dataSource.getRepository(EmployeePayrollRecord);
   const employeeLeaveRepo = dataSource.getRepository(EmployeeLeaveBalance);
-  const employeeAbsenceRepo = dataSource.getRepository(EmployeeAbsence);
+  const amenityRepo = dataSource.getRepository(Amenity);
+  const reservationRepo = dataSource.getRepository(Reservation);
 
   const currentYear: number = new Date().getFullYear();
 
@@ -115,6 +118,28 @@ async function seed(): Promise<SeedResult> {
     categoryData as Category[],
   );
   await categoryRepo.save(categories);
+
+  // --- Amenities ---
+  const amenities: Amenity[] = [];
+  for (let i = 0; i < 5; i++) {
+    amenities.push(
+      amenityRepo.create({
+        name: faker.commerce.productName(),
+        description: faker.lorem.sentence(),
+        location: faker.location.streetAddress(),
+        capacity: faker.number.int({ min: 5, max: 100 }),
+        price: faker.number.float({ min: 0, max: 500, fractionDigits: 2 }),
+        currency: 'MXN',
+        imageUrl: faker.internet.url(),
+        tags: faker.helpers.arrayElements(['indoor', 'outdoor', 'popular'], {
+          min: 0,
+          max: 2,
+        }),
+        isActive: true,
+      }),
+    );
+  }
+  await amenityRepo.save(amenities);
 
   // --- Employees ---
   const employees: Employee[] = [];
@@ -148,8 +173,7 @@ async function seed(): Promise<SeedResult> {
       contractStart: hireDate,
       contractEnd: terminationDate,
       probationPeriod: true,
-      probationEndDate: faker
-        .date
+      probationEndDate: faker.date
         .soon({ days: 90, refDate: hireDateObj })
         .toISOString()
         .split('T')[0],
@@ -217,7 +241,7 @@ async function seed(): Promise<SeedResult> {
       totalDeductions: (baseSalary / 12) * 0.1,
       netPay: (baseSalary / 12) * 0.9,
       payDate: hireDate,
-      reference: faker.finance.transactionId(),
+      reference: faker.string.uuid(),
     });
     await employeePayrollRepo.save(payroll);
 
@@ -330,8 +354,33 @@ async function seed(): Promise<SeedResult> {
 
     resident.emergencyContacts = [emergency];
     resident.documents = documents;
-    residents.push(resident);
+  residents.push(resident);
   }
+
+  // --- Reservations ---
+  const reservations: Reservation[] = [];
+  residents.forEach((resident) => {
+    const count = faker.number.int({ min: 0, max: 2 });
+    for (let i = 0; i < count; i++) {
+      const amenity = faker.helpers.arrayElement(amenities);
+      const start = randomDateInYear(currentYear);
+      const end = new Date(start.getTime());
+      end.setHours(end.getHours() + faker.number.int({ min: 1, max: 4 }));
+      reservations.push(
+        reservationRepo.create({
+          resident,
+          amenity,
+          startTime: start,
+          endTime: end,
+          status: faker.helpers.arrayElement(
+            Object.values(ReservationStatus),
+          ) as ReservationStatus,
+          remarks: faker.lorem.sentence(),
+        }),
+      );
+    }
+  });
+  await reservationRepo.save(reservations);
 
   // --- Maintenance ---
   const maintenances: Maintenance[] = [];
@@ -377,7 +426,7 @@ async function seed(): Promise<SeedResult> {
             Object.values(PaymentMethod),
           ) as PaymentMethod,
           status: PaymentStatus.COMPLETED,
-          referenceNumber: faker.finance.transactionId(),
+          referenceNumber: faker.string.uuid(),
           invoiceUrl: faker.internet.url(),
           dueDate,
           paymentDate: randomDateInMonth(currentYear, month),
@@ -406,12 +455,36 @@ async function seed(): Promise<SeedResult> {
         currency: 'MXN',
         method: PaymentMethod.TRANSFER,
         status: PaymentStatus.COMPLETED,
-        referenceNumber: faker.finance.transactionId(),
+        referenceNumber: faker.string.uuid(),
         paymentDate: new Date(employee.hireDate),
       }),
     );
   });
 
+  // Payments for amenity reservations
+  reservations.forEach((reservation) => {
+    const grossAmount = reservation.amenity.price;
+    const taxAmount = Number((grossAmount * 0.16).toFixed(2));
+    const netAmount = grossAmount + taxAmount;
+    payments.push(
+      paymentRepo.create({
+        kind: PaymentKind.AMENITY,
+        resident: reservation.resident,
+        reservation,
+        grossAmount,
+        taxAmount,
+        discountAmount: 0,
+        netAmount,
+        currency: reservation.amenity.currency,
+        method: faker.helpers.arrayElement(
+          Object.values(PaymentMethod),
+        ) as PaymentMethod,
+        status: PaymentStatus.COMPLETED,
+        referenceNumber: faker.string.uuid(),
+        paymentDate: reservation.startTime,
+      }),
+    );
+  });
 
   // --- Budgets and Items ---
   for (let year = currentYear - 1; year <= currentYear; year++) {
@@ -564,9 +637,9 @@ async function seed(): Promise<SeedResult> {
         currency: expense.provider.contract.currency,
         method: PaymentMethod.TRANSFER,
         status: PaymentStatus.COMPLETED,
-        referenceNumber: faker.finance.transactionId(),
+        referenceNumber: faker.string.uuid(),
         invoiceUrl: faker.internet.url(),
-      paymentDate: expense.expenseDate,
+        paymentDate: expense.expenseDate,
       }),
     );
   });

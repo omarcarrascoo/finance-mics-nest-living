@@ -13,6 +13,7 @@ import { BankReconciliationModule } from './modules/bank-reconciliation/bank-rec
 import { ReportsModule } from './modules/reports/reports.module';
 import { MaintenanceModule } from './modules/maintenance/maintenance.module';
 import { ProvidersModule } from './modules/providers/providers.module';
+import { EmployeesModule } from './modules/employees/employees.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { ProvidersModule } from './modules/providers/providers.module';
     BankReconciliationModule,
     ReportsModule,
     MaintenanceModule,
+    EmployeesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

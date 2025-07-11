@@ -24,7 +24,7 @@ export class EmployeeAbsence {
   @ManyToOne(() => Employee, (e) => e.absences, { onDelete: 'CASCADE' })
   employee: Employee;
 
-  @Column({ type: 'enum', enum: AbsenceType })
+  @Column({ type: 'simple-enum', enum: AbsenceType })
   type: AbsenceType;
 
   @Column({ type: 'date' })

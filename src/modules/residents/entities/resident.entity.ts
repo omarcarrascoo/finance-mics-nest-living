@@ -11,6 +11,7 @@ import { ResidentContact } from './resident-contact.entity';
 import { ResidentLease } from './resident-lease.entity';
 import { ResidentDocument } from './resident-document.entity';
 import { ResidentStatistic } from './resident-statistic.entity';
+import { Reservation } from '../../reservations/entities/reservation.entity';
 import { Payment } from '../../payments/entities/payment.entity';
 import { Maintenance } from '../../maintenance/entities/maintenance.entity';
 import { Delinquency } from '../../delinquencies/entities/delinquency.entity';
@@ -89,9 +90,13 @@ export class Resident {
   @OneToMany(() => Delinquency, (d) => d.resident)
   delinquencies: Delinquency[];
 
+  // — Nuevas reservas de amenidades —
+  @OneToMany(() => Reservation, (r) => r.resident)
+  reservations: Reservation[];
+
   // — Metadatos y etiquetas —
   @Column('simple-array', { nullable: true })
-  tags?: string[]; // e.g. ["VIP","PetFriendly"]
+  tags?: string[];
 
   @Column({ type: 'text', nullable: true })
   internalNotes?: string;

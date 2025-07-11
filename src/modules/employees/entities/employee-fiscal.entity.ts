@@ -16,7 +16,7 @@ export class EmployeeFiscal {
   @Column({ unique: true })
   rfc: string;
 
-  @Column({ type: 'enum', enum: TaxRegime })
+  @Column({ type: 'simple-enum', enum: TaxRegime })
   taxRegime: TaxRegime;
 
   @Column({ nullable: true })
