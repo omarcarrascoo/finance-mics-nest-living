@@ -11,6 +11,7 @@ import {
 import { Resident } from '../../residents/entities/resident.entity';
 import { Amenity } from '../../amenities/entities/amenity.entity';
 import { Payment } from '../../payments/entities/payment.entity';
+import { Condo } from '../../condos/entities/condo.entity';
 
 export enum ReservationStatus {
   PENDING = 'PENDING',
@@ -22,6 +23,9 @@ export enum ReservationStatus {
 export class Reservation {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @ManyToOne(() => Condo)
+  condo: Condo;
 
   @ManyToOne(() => Resident, (r) => r.reservations, { nullable: false })
   resident: Resident;

@@ -15,11 +15,15 @@ import { ProviderContract } from './provider-contract.entity';
 import { ProviderDocument } from './provider-document.entity';
 import { ProviderStatistic } from './provider-statistic.entity';
 import { ProviderExpense } from './provider-expense.entity';
+import { Condo } from '../../condos/entities/condo.entity';
 
 @Entity('providers')
 export class Provider {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @ManyToOne(() => Condo)
+  condo: Condo;
 
   // — Datos básicos —
   @Column()

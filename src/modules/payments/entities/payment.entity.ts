@@ -13,11 +13,15 @@ import { Employee } from '../../employees/entities/employee.entity';
 import { Category } from '../../categories/entities/category.entity';
 import { Reservation } from '../../reservations/entities/reservation.entity';
 import { PaymentMethod, PaymentKind, PaymentStatus } from './payment.enums';
+import { Condo } from '../../condos/entities/condo.entity';
 
 @Entity('payments')
 export class Payment {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @ManyToOne(() => Condo)
+  condo: Condo;
 
   // — Tipo de flujo —
   @Column({ type: 'simple-enum', enum: PaymentKind })

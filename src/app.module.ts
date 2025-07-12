@@ -14,6 +14,7 @@ import { ReportsModule } from './modules/reports/reports.module';
 import { MaintenanceModule } from './modules/maintenance/maintenance.module';
 import { ProvidersModule } from './modules/providers/providers.module';
 import { EmployeesModule } from './modules/employees/employees.module';
+import { CondosModule } from './modules/condos/condos.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { EmployeesModule } from './modules/employees/employees.module';
     ReportsModule,
     MaintenanceModule,
     EmployeesModule,
+    CondosModule,
   ],
   controllers: [AppController],
   providers: [AppService],

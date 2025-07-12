@@ -5,6 +5,7 @@ import {
   Column,
   OneToOne,
   OneToMany,
+  ManyToOne,
   JoinColumn,
 } from 'typeorm';
 import { EmployeeFiscal } from './employee-fiscal.entity';
@@ -16,6 +17,7 @@ import { EmployeePayrollRecord } from './employee-payroll.entity';
 import { EmployeeLeaveBalance } from './employee-leave.entity';
 import { EmployeeAbsence } from './employee-absence.entity';
 import { Payment } from '../../payments/entities/payment.entity';
+import { Condo } from '../../condos/entities/condo.entity';
 
 export enum EmployeeType {
   FULL_TIME = 'FULL_TIME',
@@ -29,6 +31,9 @@ export enum EmployeeType {
 export class Employee {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @ManyToOne(() => Condo)
+  condo: Condo;
 
   // — Datos personales básicos —
   @Column()

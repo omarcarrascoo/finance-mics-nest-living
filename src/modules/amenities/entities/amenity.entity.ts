@@ -1,11 +1,21 @@
 // src/modules/amenities/entities/amenity.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  ManyToOne,
+} from 'typeorm';
 import { Reservation } from '../../reservations/entities/reservation.entity';
+import { Condo } from '../../condos/entities/condo.entity';
 
 @Entity('amenities')
 export class Amenity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @ManyToOne(() => Condo)
+  condo: Condo;
 
   // — Datos básicos —
   @Column()

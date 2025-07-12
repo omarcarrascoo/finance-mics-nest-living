@@ -1,5 +1,6 @@
 import { DataSource } from 'typeorm';
 import { faker } from '@faker-js/faker';
+import { Condo } from '../src/modules/condos/entities/condo.entity';
 import { Resident } from '../src/modules/residents/entities/resident.entity';
 import { ResidentContact } from '../src/modules/residents/entities/resident-contact.entity';
 import { ResidentLease } from '../src/modules/residents/entities/resident-lease.entity';
@@ -75,6 +76,7 @@ function randomDateInYear(year: number): Date {
 async function seed(): Promise<SeedResult> {
   await dataSource.initialize();
 
+  const condoRepo = dataSource.getRepository(Condo);
   const residentRepo = dataSource.getRepository(Resident);
   const residentContactRepo = dataSource.getRepository(ResidentContact);
   const residentLeaseRepo = dataSource.getRepository(ResidentLease);
@@ -106,6 +108,16 @@ async function seed(): Promise<SeedResult> {
 
   const currentYear: number = new Date().getFullYear();
 
+  // --- Condos ---
+  const condos = await condoRepo.save(
+    condoRepo.create([
+      { name: 'Condo Alpha', address: faker.location.streetAddress() },
+      { name: 'Condo Beta', address: faker.location.streetAddress() },
+    ]),
+  );
+
+  const randomCondo = () => faker.helpers.arrayElement(condos);
+
   // --- Categories ---
   const categoryData: Array<Partial<Category>> = [
     { name: 'Maintenance', type: CategoryType.MAINTENANCE },
@@ -115,7 +127,7 @@ async function seed(): Promise<SeedResult> {
     { name: 'Landscaping', type: CategoryType.OTHER },
   ];
   const categories: Category[] = categoryRepo.create(
-    categoryData as Category[],
+    categoryData.map((c) => ({ ...c, condo: randomCondo() })) as Category[],
   );
   await categoryRepo.save(categories);
 
@@ -136,6 +148,7 @@ async function seed(): Promise<SeedResult> {
           max: 2,
         }),
         isActive: true,
+        condo: randomCondo(),
       }),
     );
   }
@@ -230,6 +243,7 @@ async function seed(): Promise<SeedResult> {
         max: 2,
       }),
       notes: faker.lorem.sentence(),
+      condo: randomCondo(),
     });
     await employeeRepo.save(employee);
 
@@ -322,6 +336,7 @@ async function seed(): Promise<SeedResult> {
         max: 2,
       }),
       internalNotes: faker.lorem.sentence(),
+      condo: randomCondo(),
     });
     await residentRepo.save(resident);
 
@@ -370,6 +385,7 @@ async function seed(): Promise<SeedResult> {
         reservationRepo.create({
           resident,
           amenity,
+          condo: resident.condo,
           startTime: start,
           endTime: end,
           status: faker.helpers.arrayElement(
@@ -389,6 +405,7 @@ async function seed(): Promise<SeedResult> {
       maintenances.push(
         maintenanceRepo.create({
           resident,
+          condo: resident.condo,
           amount: 100,
           dueDate: randomDateInMonth(currentYear, month),
           paid: faker.datatype.boolean(),
@@ -416,6 +433,7 @@ async function seed(): Promise<SeedResult> {
         paymentRepo.create({
           kind: PaymentKind.RESIDENT_FEE,
           resident,
+          condo: resident.condo,
           category: faker.helpers.arrayElement(categories),
           grossAmount,
           taxAmount,
@@ -448,6 +466,7 @@ async function seed(): Promise<SeedResult> {
       paymentRepo.create({
         kind: PaymentKind.PAYROLL,
         employee,
+        condo: employee.condo,
         grossAmount: base,
         taxAmount: 0,
         discountAmount: deductions,
@@ -471,6 +490,7 @@ async function seed(): Promise<SeedResult> {
         kind: PaymentKind.AMENITY,
         resident: reservation.resident,
         reservation,
+        condo: reservation.condo,
         grossAmount,
         taxAmount,
         discountAmount: 0,
@@ -488,7 +508,7 @@ async function seed(): Promise<SeedResult> {
 
   // --- Budgets and Items ---
   for (let year = currentYear - 1; year <= currentYear; year++) {
-    const budget = budgetRepo.create({ year });
+    const budget = budgetRepo.create({ year, condo: randomCondo() });
     await budgetRepo.save(budget);
 
     const budgetItems: BudgetItem[] = categories.map((cat: Category) => {
@@ -526,6 +546,7 @@ async function seed(): Promise<SeedResult> {
         name,
         legalName: `${name} S.A. de C.V.`,
         serviceType,
+        condo: randomCondo(),
         contact: {
           contactName: faker.person.fullName(),
           phone: faker.phone.number(),
@@ -612,6 +633,7 @@ async function seed(): Promise<SeedResult> {
             provider,
             serviceCategory,
             totalAmount,
+            condo: provider.condo,
             expenseDate: randomDateInMonth(currentYear, month),
           }),
         );
@@ -630,6 +652,7 @@ async function seed(): Promise<SeedResult> {
         kind: PaymentKind.PROVIDER,
         provider: expense.provider,
         category: expense.serviceCategory,
+        condo: expense.provider.condo,
         grossAmount,
         taxAmount,
         discountAmount: 0,
@@ -658,7 +681,12 @@ async function seed(): Promise<SeedResult> {
         fractionDigits: 2,
       });
       delinquencies.push(
-        delinquencyRepo.create({ resident, description, amount }),
+        delinquencyRepo.create({
+          resident,
+          description,
+          amount,
+          condo: resident.condo,
+        }),
       );
     }
   });
@@ -681,6 +709,7 @@ async function seed(): Promise<SeedResult> {
           concept,
           amount,
           approvedBy,
+          condo: randomCondo(),
           date: randomDateInMonth(currentYear, month),
         }),
       );
@@ -706,6 +735,7 @@ async function seed(): Promise<SeedResult> {
           type,
           amount,
           notes,
+          condo: randomCondo(),
           date: randomDateInMonth(currentYear, month),
         }),
       );
@@ -732,6 +762,7 @@ async function seed(): Promise<SeedResult> {
           bankAmount,
           matched,
           systemReference,
+          condo: randomCondo(),
         }),
       );
     }
