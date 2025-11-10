@@ -24,9 +24,15 @@ export class Payment {
   kind: PaymentKind;
 
   // — Relaciones opcionales —
-  @ManyToOne(() => Resident, (r) => r.payments, { nullable: true })
-  @JoinColumn()
+  @ManyToOne(() => Resident, (r) => r.payments, {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'resident_id' })
   resident?: Resident;
+
+  @Column({ name: 'resident_id', type: 'text', nullable: true })
+  residentId?: string;
 
   @ManyToOne(() => Provider, (p) => p.expenses, { nullable: true })
   @JoinColumn()

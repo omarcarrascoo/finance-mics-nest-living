@@ -5,7 +5,6 @@ import {
   Column,
   OneToOne,
   OneToMany,
-  JoinColumn,
 } from 'typeorm';
 import { ResidentContact } from './resident-contact.entity';
 import { ResidentLease } from './resident-lease.entity';
@@ -47,37 +46,33 @@ export class Resident {
   status: 'ACTIVE' | 'INACTIVE' | 'PENDING';
 
   // — Relaciones auxiliares —
-  @OneToOne(() => ResidentContact, (c) => c.resident, {
-    cascade: true,
+  @OneToOne(() => ResidentContact, (c) => c.primaryOf, {
     eager: true,
   })
-  @JoinColumn()
   primaryContact?: ResidentContact;
 
   @OneToMany(() => ResidentContact, (c) => c.resident, {
-    cascade: true,
     eager: true,
+    cascade: ['insert', 'update'],
+    orphanedRowAction: 'delete',
   })
   emergencyContacts?: ResidentContact[];
 
   @OneToOne(() => ResidentLease, (l) => l.resident, {
-    cascade: true,
     eager: true,
   })
-  @JoinColumn()
   lease?: ResidentLease;
 
   @OneToMany(() => ResidentDocument, (d) => d.resident, {
-    cascade: true,
     eager: true,
+    cascade: ['insert', 'update'],
+    orphanedRowAction: 'delete',
   })
   documents?: ResidentDocument[];
 
   @OneToOne(() => ResidentStatistic, (s) => s.resident, {
-    cascade: ['insert', 'update'],
     eager: true,
   })
-  @JoinColumn()
   statistics?: ResidentStatistic;
 
   // — Relaciones de negocio existentes —
