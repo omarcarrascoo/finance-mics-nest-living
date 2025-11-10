@@ -17,18 +17,25 @@ export class ResidentsService {
   async create(resident: Resident) {
     const entity = this.residentsRepo.create();
     const merged = this.mergeResidentRelations(entity, resident);
-    return this.residentsRepo.save(merged);
+    const saved = await this.residentsRepo.save(merged);
+    return this.serializeResident(saved);
   }
 
-  findAll() {
-    return this.residentsRepo.find({ relations: ['payments', 'reservations'] });
+  async findAll() {
+    const residents = await this.residentsRepo.find({
+      relations: ['payments', 'reservations'],
+    });
+
+    return residents.map((resident) => this.serializeResident(resident)!);
   }
 
-  findOne(id: string) {
-    return this.residentsRepo.findOne({
+  async findOne(id: string) {
+    const resident = await this.residentsRepo.findOne({
       where: { id },
       relations: ['payments', 'reservations'],
     });
+
+    return this.serializeResident(resident);
   }
 
   async update(id: string, resident: Partial<Resident>) {
@@ -48,7 +55,8 @@ export class ResidentsService {
     }
 
     const merged = this.mergeResidentRelations(existing, resident);
-    return this.residentsRepo.save(merged);
+    const saved = await this.residentsRepo.save(merged);
+    return this.serializeResident(saved);
   }
 
   remove(id: string) {
@@ -195,5 +203,94 @@ export class ResidentsService {
     }
 
     return prepared;
+  }
+
+  private serializeResident(resident?: Resident | null): Resident | null {
+    if (!resident) {
+      return resident ?? null;
+    }
+
+    const {
+      primaryContact,
+      emergencyContacts,
+      documents,
+      lease,
+      statistics,
+      payments,
+      maintenance,
+      delinquencies,
+      reservations,
+      ...rest
+    } = resident;
+
+    const clone: Resident = {
+      ...rest,
+    } as Resident;
+
+    if (primaryContact) {
+      const sanitized = { ...primaryContact } as ResidentContact;
+      (sanitized as any).primaryOf = undefined;
+      (sanitized as any).resident = undefined;
+      clone.primaryContact = sanitized;
+    }
+
+    if (emergencyContacts) {
+      clone.emergencyContacts = emergencyContacts.map((contact) => {
+        const sanitized = { ...contact } as ResidentContact;
+        (sanitized as any).resident = undefined;
+        (sanitized as any).primaryOf = undefined;
+        return sanitized;
+      });
+    }
+
+    if (documents) {
+      clone.documents = documents.map((document) => {
+        const sanitized = { ...document } as ResidentDocument;
+        (sanitized as any).resident = undefined;
+        return sanitized;
+      });
+    }
+
+    if (lease) {
+      const sanitized = { ...lease } as ResidentLease;
+      (sanitized as any).resident = undefined;
+      clone.lease = sanitized;
+    }
+
+    if (statistics) {
+      const sanitized = { ...statistics } as ResidentStatistic;
+      (sanitized as any).resident = undefined;
+      clone.statistics = sanitized;
+    }
+
+    if (payments) {
+      clone.payments = payments.map((payment) => ({
+        ...payment,
+        resident: undefined,
+      })) as any;
+    }
+
+    if (maintenance) {
+      clone.maintenance = maintenance.map((request) => ({
+        ...request,
+        resident: undefined,
+      })) as any;
+    }
+
+    if (delinquencies) {
+      clone.delinquencies = delinquencies.map((record) => ({
+        ...record,
+        resident: undefined,
+      })) as any;
+    }
+
+    if (reservations) {
+      clone.reservations = reservations.map((reservation) => ({
+        ...reservation,
+        resident: undefined,
+      })) as any;
+    }
+
+    return clone;
   }
 }
