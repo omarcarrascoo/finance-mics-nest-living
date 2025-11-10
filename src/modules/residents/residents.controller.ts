@@ -31,11 +31,13 @@ export class ResidentsController {
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() resident: Resident) {
+    console.log('Update Resident:' + id);
     return this.residentsService.update(id, resident);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
+    console.log('Delete Resident:' + id);
     return this.residentsService.remove(id);
   }
 }
