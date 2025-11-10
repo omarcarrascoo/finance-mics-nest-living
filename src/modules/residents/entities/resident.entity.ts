@@ -48,6 +48,8 @@ export class Resident {
   // — Relaciones auxiliares —
   @OneToOne(() => ResidentContact, (c) => c.primaryOf, {
     eager: true,
+    cascade: ['insert', 'update', 'remove'],
+    orphanedRowAction: 'delete',
   })
   primaryContact?: ResidentContact;
 
@@ -60,6 +62,8 @@ export class Resident {
 
   @OneToOne(() => ResidentLease, (l) => l.resident, {
     eager: true,
+    cascade: ['insert', 'update', 'remove'],
+    orphanedRowAction: 'delete',
   })
   lease?: ResidentLease;
 
@@ -72,6 +76,8 @@ export class Resident {
 
   @OneToOne(() => ResidentStatistic, (s) => s.resident, {
     eager: true,
+    cascade: ['insert', 'update', 'remove'],
+    orphanedRowAction: 'delete',
   })
   statistics?: ResidentStatistic;
 
