@@ -1,5 +1,5 @@
 // src/modules/residents/entities/resident-statistic.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn } from 'typeorm';
 import { Resident } from './resident.entity';
 
 @Entity('resident_statistics')
@@ -31,6 +31,10 @@ export class ResidentStatistic {
   @Column('decimal', { precision: 5, scale: 2, default: 0 })
   delinquencyRate: number; // % of months with overdue payments
 
-  @OneToOne(() => Resident, (r) => r.statistics)
+  @OneToOne(() => Resident, (r) => r.statistics, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'resident_id' })
   resident: Resident;
+
+  @Column({ name: 'resident_id', type: 'text', unique: true })
+  residentId: string;
 }

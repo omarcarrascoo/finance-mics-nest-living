@@ -1,5 +1,5 @@
 // src/modules/residents/entities/resident-lease.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn } from 'typeorm';
 import { Resident } from './resident.entity';
 
 @Entity('resident_leases')
@@ -25,6 +25,10 @@ export class ResidentLease {
   @Column({ type: 'text', nullable: true })
   terms?: string;
 
-  @OneToOne(() => Resident, (r) => r.lease)
+  @OneToOne(() => Resident, (r) => r.lease, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'resident_id' })
   resident: Resident;
+
+  @Column({ name: 'resident_id', type: 'text', unique: true })
+  residentId: string;
 }
